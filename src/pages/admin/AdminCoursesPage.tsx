@@ -144,7 +144,7 @@ export default function AdminCoursesPage() {
           <h2 className="text-lg font-semibold text-foreground">{editCourse ? "Edit Course" : "New Course"}</h2>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-4 pt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="px-3 sm:px-4 pt-4 space-y-4 overflow-x-hidden">
           {/* Basic Info */}
           <FormSection icon={BookOpen} title="Basic Information">
             <FormInput label="Course Name" type="text" placeholder="e.g. HSC Physics 2025" value={courseName} onChange={(e) => setCourseName(e.target.value)} required />
