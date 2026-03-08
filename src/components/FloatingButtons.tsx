@@ -95,18 +95,59 @@ export function FloatingButtons({ course }: FloatingButtonsProps = {}) {
   const enrolledCourseIds = userDoc?.enrolledCourses?.map(c => c.courseId) || [];
   const enrolledCoursesList = allCourses.filter(c => enrolledCourseIds.includes(c.id));
 
-  // --- Menu Button Component ---
-  const MenuButton = ({ icon, label, onClick, accent }: { icon: React.ReactNode; label: string; onClick: () => void; accent?: boolean }) => (
+  // Keyword-based chat response
+  const handleChatSend = () => {
+    const text = chatInput.trim();
+    if (!text) return;
+    setChatMessages(prev => [...prev, { role: "user", content: text }]);
+    setChatInput("");
+
+    const lower = text.toLowerCase();
+    const keywords: { match: string[]; reply: string; nav?: MenuScreen }[] = [
+      { match: ["কোর্স", "course", "সকল কোর্স", "কি কি কোর্স"], reply: "📚 সকল কোর্সের তথ্য দেখুন:", nav: "courses" },
+      { match: ["এনরোল", "enroll", "ভর্তি", "admit", "admission"], reply: "📝 এনরোলমেন্ট প্রক্রিয়া দেখুন:", nav: "enrollment-guide" },
+      { match: ["পেমেন্ট", "payment", "টাকা", "বিকাশ", "bkash", "নগদ", "nagad", "send money"], reply: "💳 পেমেন্ট তথ্য দেখুন:", nav: "payment-info" },
+      { match: ["যোগাযোগ", "contact", "ফোন", "phone", "নাম্বার", "number", "সোশ্যাল", "social"], reply: "📞 যোগাযোগের তথ্য:", nav: "contact" },
+      { match: ["আমার কোর্স", "my course", "আমার", "enrolled"], reply: "🎓 আপনার কোর্সসমূহ:", nav: "my-courses" },
+      { match: ["লিংক", "link", "দরকারি"], reply: "🔗 দরকারি লিংকসমূহ:", nav: "useful-links" },
+      { match: ["হাই", "hi", "hello", "হ্যালো", "আসসালামু"], reply: "ওয়ালাইকুম আসসালাম! 😊 কিভাবে সাহায্য করতে পারি? নিচের অপশন থেকে বেছে নিন:" },
+      { match: ["ধন্যবাদ", "thanks", "thank"], reply: "আপনাকেও ধন্যবাদ! 🙏 আর কোনো প্রশ্ন থাকলে জানাবেন।" },
+      { match: ["প্রাইস", "price", "দাম", "মূল্য", "কত"], reply: "💰 কোর্সের মূল্য জানতে কোর্স তালিকা দেখুন:", nav: "courses" },
+    ];
+
+    // Check for course name match
+    const matchedCourse = allCourses.find(c => lower.includes(c.courseName.toLowerCase()));
+    if (matchedCourse) {
+      setSelectedCourse(matchedCourse);
+      setChatMessages(prev => [...prev, { role: "bot", content: `📚 "${matchedCourse.courseName}" কোর্সের বিবরণ দেখুন:`, screen: "course-detail" }]);
+      navigateTo("course-detail");
+      return;
+    }
+
+    for (const kw of keywords) {
+      if (kw.match.some(m => lower.includes(m))) {
+        setChatMessages(prev => [...prev, { role: "bot", content: kw.reply, screen: kw.nav }]);
+        if (kw.nav) navigateTo(kw.nav);
+        return;
+      }
+    }
+
+    // Default fallback
+    setChatMessages(prev => [...prev, { role: "bot", content: "দুঃখিত, আমি আপনার প্রশ্নটি বুঝতে পারিনি। 😅 নিচের অপশন থেকে বেছে নিন অথবা WhatsApp এ যোগাযোগ করুন।" }]);
+  };
+
+  // --- Capsule Button Component ---
+  const CapsuleButton = ({ icon, label, onClick, accent }: { icon: React.ReactNode; label: string; onClick: () => void; accent?: boolean }) => (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-lg text-sm font-medium transition-colors text-left ${
+      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-medium transition-all border ${
         accent
-          ? "bg-primary text-primary-foreground hover:bg-primary/90"
-          : "bg-muted/60 text-foreground hover:bg-accent"
+          ? "bg-primary text-primary-foreground border-primary hover:bg-primary/90 shadow-sm"
+          : "bg-background text-foreground border-border hover:bg-accent hover:border-accent"
       }`}
     >
       <span className="shrink-0">{icon}</span>
-      <span className="flex-1 min-w-0 truncate">{label}</span>
+      <span>{label}</span>
     </button>
   );
 
@@ -115,19 +156,16 @@ export function FloatingButtons({ course }: FloatingButtonsProps = {}) {
     switch (screen) {
       case "main":
         return (
-          <div className="space-y-2">
-            <div className="text-sm text-muted-foreground mb-3">
-              স্বাগতম! 👋 নিচের অপশন থেকে বেছে নিন:
-            </div>
-            <MenuButton icon={<BookOpen className="h-4 w-4" />} label="সকল কোর্সের তথ্য" onClick={() => navigateTo("courses")} />
-            <MenuButton icon={<CreditCard className="h-4 w-4" />} label="এনরোলমেন্ট করবেন কিভাবে?" onClick={() => navigateTo("enrollment-guide")} />
-            <MenuButton icon={<CreditCard className="h-4 w-4" />} label="পেমেন্ট তথ্য" onClick={() => navigateTo("payment-info")} />
+          <div className="flex flex-wrap gap-2">
+            <CapsuleButton icon={<BookOpen className="h-3.5 w-3.5" />} label="সকল কোর্স" onClick={() => navigateTo("courses")} />
+            <CapsuleButton icon={<CreditCard className="h-3.5 w-3.5" />} label="এনরোলমেন্ট গাইড" onClick={() => navigateTo("enrollment-guide")} />
+            <CapsuleButton icon={<CreditCard className="h-3.5 w-3.5" />} label="পেমেন্ট তথ্য" onClick={() => navigateTo("payment-info")} />
             {user && enrolledCourseIds.length > 0 && (
-              <MenuButton icon={<GraduationCap className="h-4 w-4" />} label="আমার কোর্সসমূহ" onClick={() => navigateTo("my-courses")} accent />
+              <CapsuleButton icon={<GraduationCap className="h-3.5 w-3.5" />} label="আমার কোর্সসমূহ" onClick={() => navigateTo("my-courses")} accent />
             )}
-            <MenuButton icon={<Phone className="h-4 w-4" />} label="যোগাযোগ ও সোশ্যাল মিডিয়া" onClick={() => navigateTo("contact")} />
+            <CapsuleButton icon={<Phone className="h-3.5 w-3.5" />} label="যোগাযোগ" onClick={() => navigateTo("contact")} />
             {settings.usefulLinks?.length > 0 && (
-              <MenuButton icon={<ExternalLink className="h-4 w-4" />} label="দরকারি লিংকসমূহ" onClick={() => navigateTo("useful-links")} />
+              <CapsuleButton icon={<ExternalLink className="h-3.5 w-3.5" />} label="দরকারি লিংক" onClick={() => navigateTo("useful-links")} />
             )}
           </div>
         );
