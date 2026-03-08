@@ -33,7 +33,7 @@ export function DesktopUserSidebar() {
         <SidebarLink to="/profile" icon={User} label="Profile" active={isActive("/profile")} />
 
         {/* All Materials - shows course subjects + allMaterialsLink PDF */}
-        {activeCourse && (
+        {activeCourse && userDoc?.status === "approved" && (
           <>
             <div className="my-2 border-t border-border" />
             <p className="px-3 py-1 text-xs text-muted-foreground font-medium uppercase">Course</p>
