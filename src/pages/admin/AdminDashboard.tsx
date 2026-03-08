@@ -12,22 +12,24 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const [usersSnap, coursesSnap, videosSnap, pendingRequestsSnap] = await Promise.all([
+    const fetch = async () => {
+      const [usersSnap, pendingSnap, coursesSnap, videosSnap] = await Promise.all([
         getDocs(query(collection(db, "users"), where("role", "==", "student"))),
+        getDocs(collection(db, "users")),
         getDocs(collection(db, "courses")),
         getDocs(collection(db, "videos")),
-        getDocs(query(collection(db, "enrollRequests"), where("status", "==", "pending"))),
       ]);
+      const allUsers = pendingSnap.docs.map(d => d.data());
+      const pendingCount = allUsers.filter(u => u.status === "pending" && u.role === "student").length;
       setStats({
         users: usersSnap.size,
-        pending: pendingRequestsSnap.size,
+        pending: pendingCount,
         courses: coursesSnap.size,
         videos: videosSnap.size,
       });
       setLoading(false);
     };
-    fetchStats();
+    fetch();
   }, []);
 
   const cards = [
