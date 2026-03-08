@@ -31,8 +31,14 @@ export async function registerSession(uid: string): Promise<string> {
 
   // Get existing sessions for this user
   const sessionsRef = collection(db, SESSIONS_COLLECTION);
-  const q = query(sessionsRef, where("userId", "==", uid), orderBy("createdAt", "asc"));
+  const q = query(sessionsRef, where("userId", "==", uid));
   const snap = await getDocs(q);
+  // Sort client-side by createdAt ascending to avoid composite index
+  const sortedDocs = [...snap.docs].sort((a, b) => {
+    const aTime = a.data().createdAt?.toMillis?.() || 0;
+    const bTime = b.data().createdAt?.toMillis?.() || 0;
+    return aTime - bTime;
+  });
 
   // If already at or above limit, delete ALL old sessions
   if (snap.size >= MAX_SESSIONS) {
