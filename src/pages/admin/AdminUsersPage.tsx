@@ -80,6 +80,22 @@ export default function AdminUsersPage() {
 
   const handleRejectRequest = async (reqId: string, userId: string, courseName: string) => {
     await updateDoc(doc(db, "enrollRequests", reqId), { status: "rejected" });
+    // Remove the course from user's enrolledCourses
+    const req = enrollRequests.find(r => r.id === reqId);
+    if (req) {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data() as UserDoc;
+        const updatedCourses = (userData.enrolledCourses || []).filter(c => c.courseId !== req.courseId);
+        await updateDoc(userRef, { enrolledCourses: updatedCourses });
+        // If no approved courses left, set user status to rejected
+        const remainingApproved = enrollRequests.filter(r => r.userId === userId && r.id !== reqId && r.status === "approved");
+        if (remainingApproved.length === 0 && userData.status !== "approved") {
+          await updateDoc(userRef, { status: "rejected" });
+        }
+      }
+    }
     toast.success(`${courseName} rejected`);
     fetchData();
   };
