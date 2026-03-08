@@ -49,11 +49,17 @@ export function FloatingButtons({ course }: FloatingButtonsProps = {}) {
   const [selectedEnrolledCourse, setSelectedEnrolledCourse] = useState<Course | null>(null);
   const [coursesLoaded, setCoursesLoaded] = useState(false);
 
+  // Chat messages
+  const [chatMessages, setChatMessages] = useState<{ role: "bot" | "user"; content: string; screen?: MenuScreen }[]>([
+    { role: "bot", content: "স্বাগতম! 👋 নিচের অপশন থেকে বেছে নিন অথবা আপনার প্রশ্ন লিখুন:" }
+  ]);
+  const [chatInput, setChatInput] = useState("");
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  }, [screen]);
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [screen, chatMessages]);
 
   // Load courses when chatbot opens
   useEffect(() => {
