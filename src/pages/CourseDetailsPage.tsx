@@ -96,10 +96,14 @@ export default function CourseDetailsPage() {
       )}
 
       <div className="mt-6">
-        {isEnrolled ? (
+        {isEnrolled && !hasPendingRequest ? (
           <Link to="/my-courses" className="inline-block px-6 py-3 text-sm font-medium rounded-md bg-success text-success-foreground">
             Visit Course
           </Link>
+        ) : hasPendingRequest ? (
+          <div className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-md bg-warning/15 text-warning border border-warning/30">
+            <Clock className="h-4 w-4" /> Pending Approval
+          </div>
         ) : (
           <button onClick={handleEnroll} className="px-6 py-3 text-sm font-medium rounded-md bg-primary text-primary-foreground">
             Enroll Now
