@@ -256,11 +256,12 @@ export function FloatingButtons({ course }: FloatingButtonsProps = {}) {
             )}
 
             <div className="pt-1">
-              <MenuButton
-                icon={<CreditCard className="h-4 w-4" />}
+              <CapsuleButton
+                icon={<CreditCard className="h-3.5 w-3.5" />}
                 label="এই কোর্সে এনরোল করুন"
                 onClick={() => navigateTo("enrollment-guide")}
                 accent
+              />
               />
             </div>
           </div>
