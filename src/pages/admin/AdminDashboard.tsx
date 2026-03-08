@@ -12,24 +12,27 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
-      const [usersSnap, pendingSnap, coursesSnap, videosSnap] = await Promise.all([
+    const fetchStats = async () => {
+      const [usersSnap, coursesSnap, videosSnap, pendingRequestsSnap] = await Promise.all([
         getDocs(query(collection(db, "users"), where("role", "==", "student"))),
-        getDocs(collection(db, "users")),
         getDocs(collection(db, "courses")),
         getDocs(collection(db, "videos")),
+        getDocs(query(collection(db, "enrollRequests"), where("status", "==", "pending"))),
       ]);
-      const allUsers = pendingSnap.docs.map(d => d.data());
-      const pendingCount = allUsers.filter(u => u.status === "pending" && u.role === "student").length;
+      // Count unique users who have pending status OR pending enrollment requests
+      const allStudents = usersSnap.docs.map(d => ({ id: d.id, ...(d.data() as { status?: string }) }));
+      const pendingUserIds = new Set<string>();
+      allStudents.filter(u => u.status === "pending").forEach(u => pendingUserIds.add(u.id));
+      pendingRequestsSnap.docs.forEach(d => pendingUserIds.add(d.data().userId));
       setStats({
         users: usersSnap.size,
-        pending: pendingCount,
+        pending: pendingUserIds.size,
         courses: coursesSnap.size,
         videos: videosSnap.size,
       });
       setLoading(false);
     };
-    fetch();
+    fetchStats();
   }, []);
 
   const cards = [
