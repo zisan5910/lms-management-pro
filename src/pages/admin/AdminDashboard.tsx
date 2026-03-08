@@ -62,10 +62,11 @@ export default function AdminDashboard() {
             href={settings.youtubeChannel}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 p-4 bg-card rounded-lg border border-border text-sm text-foreground"
+            className="p-4 bg-card rounded-lg border border-border shadow-card"
           >
-            <Youtube className="h-5 w-5 text-destructive" />
-            YouTube
+            <Youtube className="h-6 w-6 text-destructive mb-2" />
+            <p className="text-sm font-medium text-foreground">YouTube Channel</p>
+            <p className="text-xs text-muted-foreground mt-1">Open in new tab</p>
           </a>
         )}
         {settings.googleDrive && (
@@ -73,10 +74,11 @@ export default function AdminDashboard() {
             href={settings.googleDrive}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 p-4 bg-card rounded-lg border border-border text-sm text-foreground"
+            className="p-4 bg-card rounded-lg border border-border shadow-card"
           >
-            <HardDrive className="h-5 w-5 text-muted-foreground" />
-            Drive
+            <HardDrive className="h-6 w-6 text-muted-foreground mb-2" />
+            <p className="text-sm font-medium text-foreground">Google Drive</p>
+            <p className="text-xs text-muted-foreground mt-1">Open in new tab</p>
           </a>
         )}
       </div>
