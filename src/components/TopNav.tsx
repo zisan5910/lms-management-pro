@@ -9,7 +9,7 @@ interface Props {
   hideMenu?: boolean;
 }
 
-export function TopNav({ onMenuClick }: Props) {
+export function TopNav({ onMenuClick, hideMenu }: Props) {
   const settings = useAppSettings();
   const { dark, toggle } = useTheme();
   const isMobile = useIsMobile();
