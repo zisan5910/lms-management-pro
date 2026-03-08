@@ -5,7 +5,13 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Video, Course } from "@/types";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
-import { ChevronLeft, ChevronRight, FileText, Play, Pause, Maximize, Minimize, RotateCcw, RotateCw, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Play, Pause, Maximize, Minimize, RotateCcw, RotateCw, ArrowLeft, Filter, Check } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FloatingButtons } from "@/components/FloatingButtons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { VideoPlayerSkeleton } from "@/components/skeletons/VideoPlayerSkeleton";
