@@ -69,7 +69,8 @@ export default function AdminCoursesPage() {
     setDiscussionGroups([{ name: "", link: "" }]); setRoutinePDF(""); setAllMaterialsLink(""); setEditCourse(null);
   };
 
-  const openAdd = () => { resetForm(); setShowForm(true); };
+  const openAdd = () => { resetForm(); setShowForm(true); searchParams.delete("add"); setSearchParams(searchParams, { replace: true }); };
+  const closeForm = () => { setShowForm(false); resetForm(); searchParams.delete("add"); setSearchParams(searchParams, { replace: true }); };
 
   const openEdit = (c: Course) => {
     setEditCourse(c); setCourseName(c.courseName); setThumbnailUrl(c.thumbnail); setPrice(c.price);
