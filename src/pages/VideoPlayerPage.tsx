@@ -113,10 +113,12 @@ export default function VideoPlayerPage() {
           }
         } catch {}
 
-        const q = query(collection(db, "videos"), where("courseId", "==", v.courseId), where("subjectId", "==", v.subjectId));
+        const q = query(collection(db, "videos"), where("courseId", "==", v.courseId));
         const relSnap = await getDocs(q);
         if (cancelled) return;
-        const vids = relSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Video));
+        const vids = relSnap.docs
+          .map((d) => ({ id: d.id, ...d.data() } as Video))
+          .filter((vid) => vid.subjectId === v.subjectId);
         vids.sort((a, b) => (a.order || 0) - (b.order || 0));
         setRelatedVideos(vids);
         setChapterFilter("All");

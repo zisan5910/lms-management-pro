@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, setDoc, deleteDoc, doc, orderBy, limit, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const SESSIONS_COLLECTION = "userSessions";
@@ -31,12 +31,18 @@ export async function registerSession(uid: string): Promise<string> {
 
   // Get existing sessions for this user
   const sessionsRef = collection(db, SESSIONS_COLLECTION);
-  const q = query(sessionsRef, where("userId", "==", uid), orderBy("createdAt", "asc"));
+  const q = query(sessionsRef, where("userId", "==", uid));
   const snap = await getDocs(q);
+  // Sort client-side by createdAt ascending to avoid composite index
+  const sortedDocs = [...snap.docs].sort((a, b) => {
+    const aTime = a.data().createdAt?.toMillis?.() || 0;
+    const bTime = b.data().createdAt?.toMillis?.() || 0;
+    return aTime - bTime;
+  });
 
   // If already at or above limit, delete ALL old sessions
-  if (snap.size >= MAX_SESSIONS) {
-    const deletePromises = snap.docs.map((d) => deleteDoc(doc(db, SESSIONS_COLLECTION, d.id)));
+  if (sortedDocs.length >= MAX_SESSIONS) {
+    const deletePromises = sortedDocs.map((d) => deleteDoc(doc(db, SESSIONS_COLLECTION, d.id)));
     await Promise.all(deletePromises);
   }
 
@@ -59,15 +65,11 @@ export async function isSessionValid(uid: string): Promise<boolean> {
   const sessionId = getLocalSessionId();
   if (!sessionId) return false;
 
+  // Use single-field query + client-side filter to avoid composite index
   const sessionsRef = collection(db, SESSIONS_COLLECTION);
-  const q = query(
-    sessionsRef,
-    where("userId", "==", uid),
-    where("sessionId", "==", sessionId),
-    limit(1)
-  );
+  const q = query(sessionsRef, where("userId", "==", uid));
   const snap = await getDocs(q);
-  return !snap.empty;
+  return snap.docs.some((d) => d.data().sessionId === sessionId);
 }
 
 /**
