@@ -90,15 +90,20 @@ export default function AdminUsersPage() {
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
       u.enrolledCourses?.some((c) => c.courseName.toLowerCase().includes(search.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || u.status === statusFilter;
+    if (statusFilter === "all") return matchesSearch;
+    if (statusFilter === "pending") {
+      // Show users with pending status OR users with pending enrollment requests
+      return matchesSearch && (u.status === "pending" || hasPendingRequest(u.id));
+    }
+    const matchesStatus = u.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   const students = users.filter(u => u.role !== "admin");
   const statusCounts = {
     all: students.length,
-    pending: students.filter(u => u.status === "pending").length,
-    approved: students.filter(u => u.status === "approved").length,
+    pending: students.filter(u => u.status === "pending" || hasPendingRequest(u.id)).length,
+    approved: students.filter(u => u.status === "approved" && !hasPendingRequest(u.id)).length,
     rejected: students.filter(u => u.status === "rejected").length,
   };
 
