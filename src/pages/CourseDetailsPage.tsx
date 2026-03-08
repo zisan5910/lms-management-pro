@@ -14,16 +14,25 @@ export default function CourseDetailsPage() {
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       if (!courseId) return;
       const snap = await getDoc(doc(db, "courses", courseId));
       if (snap.exists()) setCourse({ id: snap.id, ...snap.data() } as Course);
+      
+      // Check if user has a pending enroll request for this course
+      if (user) {
+        const q = query(collection(db, "enrollRequests"), where("userId", "==", user.uid), where("courseId", "==", courseId), where("status", "==", "pending"));
+        const reqSnap = await getDocs(q);
+        setHasPendingRequest(!reqSnap.empty);
+      }
+      
       setLoading(false);
     };
-    fetch();
-  }, [courseId]);
+    fetchData();
+  }, [courseId, user]);
 
   if (loading) return <CourseDetailsSkeleton />;
   if (!course) return <div className="p-4 text-center text-muted-foreground">Course not found.</div>;
