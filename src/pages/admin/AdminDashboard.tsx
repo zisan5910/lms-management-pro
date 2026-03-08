@@ -15,7 +15,7 @@ export default function AdminDashboard() {
     const fetch = async () => {
       const [usersSnap, pendingSnap, coursesSnap, videosSnap] = await Promise.all([
         getDocs(query(collection(db, "users"), where("role", "==", "student"))),
-        getDocs(query(collection(db, "enrollRequests"), where("status", "==", "pending"))),
+        getDocs(collection(db, "users")),
         getDocs(collection(db, "courses")),
         getDocs(collection(db, "videos")),
       ]);
