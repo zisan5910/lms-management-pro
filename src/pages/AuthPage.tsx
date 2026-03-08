@@ -105,6 +105,10 @@ export default function AuthPage() {
         status: "pending", createdAt: Timestamp.now(),
       });
       await updateDoc(doc(db, "users", userId), {
+        enrolledCourses: arrayUnion({
+          courseId, courseName: course.courseName,
+          courseThumbnail: course.thumbnail || "", enrolledAt: Timestamp.now(),
+        }),
         activeCourseId: courseId,
         paymentInfo: { method: paymentMethod, paymentNumber, transactionId, screenshot: screenshotUrl },
       });
