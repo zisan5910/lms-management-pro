@@ -26,9 +26,10 @@ export default function CourseContentPage() {
       const courseSnap = await getDoc(doc(db, "courses", courseId));
       if (courseSnap.exists()) setCourse({ id: courseSnap.id, ...courseSnap.data() } as Course);
 
-      const q = query(collection(db, "videos"), where("courseId", "==", courseId), orderBy("order", "asc"));
+      const q = query(collection(db, "videos"), where("courseId", "==", courseId));
       const snap = await getDocs(q);
       const vids = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Video));
+      vids.sort((a, b) => (a.order || 0) - (b.order || 0));
       setVideos(vids);
       setSubjects([...new Set(vids.map((v) => v.subjectName))]);
       setLoading(false);

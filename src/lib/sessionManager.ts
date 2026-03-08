@@ -65,15 +65,11 @@ export async function isSessionValid(uid: string): Promise<boolean> {
   const sessionId = getLocalSessionId();
   if (!sessionId) return false;
 
+  // Use single-field query + client-side filter to avoid composite index
   const sessionsRef = collection(db, SESSIONS_COLLECTION);
-  const q = query(
-    sessionsRef,
-    where("userId", "==", uid),
-    where("sessionId", "==", sessionId),
-    limit(1)
-  );
+  const q = query(sessionsRef, where("userId", "==", uid));
   const snap = await getDocs(q);
-  return !snap.empty;
+  return snap.docs.some((d) => d.data().sessionId === sessionId);
 }
 
 /**
