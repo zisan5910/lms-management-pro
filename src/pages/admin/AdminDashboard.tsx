@@ -32,6 +32,7 @@ export default function AdminDashboard() {
 
   const cards = [
     { label: "Total Students", value: stats.users, icon: Users, to: "/admin/users" },
+    { label: "Pending", value: stats.pending, icon: Clock, to: "/admin/pending" },
     { label: "Courses", value: stats.courses, icon: BookOpen, to: "/admin/courses" },
     { label: "Videos", value: stats.videos, icon: Video, to: "/admin/videos" },
   ];
