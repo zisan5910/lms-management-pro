@@ -141,7 +141,7 @@ export default function AdminCoursesPage() {
       <div className="animate-fade-in w-full max-w-2xl mx-auto overflow-x-hidden overflow-y-auto pb-8 box-border">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
-          <button onClick={() => { setShowForm(false); resetForm(); }} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2 hover:text-foreground transition-colors">
+          <button onClick={closeForm} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2 hover:text-foreground transition-colors">
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
           <h2 className="text-lg font-semibold text-foreground">{editCourse ? "Edit Course" : "New Course"}</h2>
