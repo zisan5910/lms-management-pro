@@ -62,7 +62,7 @@ export function UserSidebar({ open, onClose }: Props) {
           <SidebarLink to="/my-courses" icon={BookOpen} label="My Courses" onClick={onClose} />
           <SidebarLink to="/profile" icon={User} label="Profile" onClick={onClose} />
 
-          {activeCourse && (
+          {activeCourse && userDoc?.status === "approved" && (
             <>
               <div className="my-2 border-t border-border" />
               <p className="px-3 py-1 text-xs text-muted-foreground font-medium uppercase">Course</p>
