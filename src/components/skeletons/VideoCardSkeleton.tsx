@@ -2,11 +2,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function VideoCardSkeleton() {
   return (
-    <div className="bg-card rounded-xl overflow-hidden border border-border">
-      <Skeleton className="w-full aspect-video" />
-      <div className="p-3 space-y-2">
+    <div>
+      <Skeleton className="w-full aspect-video rounded-lg" />
+      <div className="mt-2.5 px-0.5 space-y-2">
         <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-3 w-2/3" />
+        <Skeleton className="h-3 w-24" />
       </div>
     </div>
   );
@@ -14,7 +14,7 @@ export function VideoCardSkeleton() {
 
 export function VideoGridSkeleton({ count = 6 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-5 sm:gap-x-4 sm:gap-y-6">
       {Array.from({ length: count }).map((_, i) => (
         <VideoCardSkeleton key={i} />
       ))}

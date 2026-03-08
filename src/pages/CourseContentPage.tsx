@@ -4,15 +4,15 @@ import { collection, query, where, getDocs, doc, getDoc } from "firebase/firesto
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Video, Course } from "@/types";
-import { useAppSettings } from "@/contexts/AppSettingsContext";
 import { VideoGridSkeleton } from "@/components/skeletons/VideoCardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VideoCard } from "@/components/VideoCard";
 
 export default function CourseContentPage() {
   const { courseId } = useParams();
   const { user, userDoc } = useAuth();
   const navigate = useNavigate();
-  const settings = useAppSettings();
+  
   const [videos, setVideos] = useState<Video[]>([]);
   const [course, setCourse] = useState<Course | null>(null);
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -57,15 +57,9 @@ export default function CourseContentPage() {
       {filtered.length === 0 ? (
         <p className="text-center text-muted-foreground py-8">No videos found.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-5 sm:gap-x-4 sm:gap-y-6">
           {filtered.map((video) => (
-            <button key={video.id} onClick={() => navigate(`/video/${video.id}`)} className="bg-card rounded-lg shadow-card overflow-hidden border border-border text-left">
-              {video.thumbnail ? <img src={video.thumbnail} alt={video.title} className="w-full h-36 object-cover" /> : <div className="w-full h-36 bg-muted" />}
-              <div className="p-3">
-                <p className="text-sm font-medium text-foreground line-clamp-2">{video.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">{settings.appName || "LMS"}</p>
-              </div>
-            </button>
+            <VideoCard key={video.id} video={video} />
           ))}
         </div>
       )}
