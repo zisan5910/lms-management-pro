@@ -11,7 +11,7 @@ const userTabs = [
 const adminTabs = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/admin/videos/add", icon: Upload, label: "Upload" },
-  { to: "/admin/pending", icon: Clock, label: "Pending" },
+  { to: "/admin/users?status=pending", icon: Clock, label: "Pending" },
   { to: "/admin/courses?add=true", icon: PlusCircle, label: "Add Course" },
 ];
 

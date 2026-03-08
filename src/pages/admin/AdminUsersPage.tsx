@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { collection, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { UserDoc } from "@/types";
@@ -16,10 +17,14 @@ interface UserWithId extends UserDoc { id: string; }
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
 export default function AdminUsersPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserWithId[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const initialStatus = (searchParams.get("status") as StatusFilter) || "all";
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>(
+    ["all", "pending", "approved", "rejected"].includes(initialStatus) ? initialStatus : "all"
+  );
   const [selectedUser, setSelectedUser] = useState<UserWithId | null>(null);
 
   const fetchUsers = async () => {
