@@ -153,17 +153,25 @@ export default function ProfilePage() {
         <div className="mt-6">
           <h3 className="font-semibold text-foreground mb-3">Enrolled Courses</h3>
           <div className="space-y-2">
-            {userDoc.enrolledCourses.map((c) => (
-              <div key={c.courseId} className={`flex items-center justify-between p-3 rounded-lg border ${c.courseId === userDoc.activeCourseId ? "border-primary bg-accent" : "border-border bg-card"}`}>
-                <div className="flex items-center gap-3">
-                  {c.courseThumbnail && <img src={c.courseThumbnail} alt="" className="w-10 h-10 rounded-md object-cover" />}
-                  <span className="text-sm font-medium text-foreground">{c.courseName}</span>
+            {userDoc.enrolledCourses.map((c) => {
+              const reqStatus = courseRequestStatuses[c.courseId] || "approved";
+              const isApproved = reqStatus === "approved";
+              const isPending = reqStatus === "pending";
+              return (
+                <div key={c.courseId} className={`flex items-center justify-between p-3 rounded-lg border ${c.courseId === userDoc.activeCourseId ? "border-primary bg-accent" : "border-border bg-card"}`}>
+                  <div className="flex items-center gap-3">
+                    {c.courseThumbnail && <img src={c.courseThumbnail} alt="" className="w-10 h-10 rounded-md object-cover" />}
+                    <div>
+                      <span className="text-sm font-medium text-foreground">{c.courseName}</span>
+                      {isPending && <p className="text-[11px] text-warning">Pending approval</p>}
+                    </div>
+                  </div>
+                  {isApproved && c.courseId !== userDoc.activeCourseId && userDoc.enrolledCourses.length > 1 && (
+                    <button onClick={() => handleSwitchCourse(c.courseId)} className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground">Select</button>
+                  )}
                 </div>
-                {c.courseId !== userDoc.activeCourseId && userDoc.enrolledCourses.length > 1 && (
-                  <button onClick={() => handleSwitchCourse(c.courseId)} className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground">Select</button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
