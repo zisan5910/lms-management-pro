@@ -106,15 +106,6 @@ export default function ProfilePage() {
         createdAt: Timestamp.now(),
       });
 
-      await updateDoc(doc(db, "users", user.uid), {
-        enrolledCourses: arrayUnion({
-          courseId: selectedCourse.id,
-          courseName: selectedCourse.courseName,
-          courseThumbnail: selectedCourse.thumbnail || "",
-          enrolledAt: Timestamp.now(),
-        }),
-      });
-
       await refreshUserDoc();
       toast.success("Enrollment request submitted! Waiting for approval.");
       setEnrollOpen(false);
