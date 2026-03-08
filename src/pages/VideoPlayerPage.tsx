@@ -300,7 +300,7 @@ export default function VideoPlayerPage() {
 
   return (
     <div className="animate-fade-in lg:flex lg:gap-4 lg:p-4 h-[calc(100vh-3.5rem)]" onContextMenu={(e) => e.preventDefault()}>
-      <div className="lg:flex-1 flex flex-col h-full">
+      <div className="lg:flex-1 flex flex-col h-full overflow-hidden">
         <div className="z-30 bg-background shrink-0">
           <div
             ref={containerRef}
