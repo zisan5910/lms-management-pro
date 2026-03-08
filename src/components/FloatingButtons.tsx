@@ -547,21 +547,50 @@ export function FloatingButtons({ course }: FloatingButtonsProps = {}) {
           </div>
 
           {/* Content */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-3">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3">
+            {/* Chat messages */}
+            {chatMessages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                  msg.role === "user"
+                    ? "bg-primary text-primary-foreground rounded-br-md"
+                    : "bg-muted text-foreground rounded-bl-md"
+                }`}>
+                  {msg.content}
+                </div>
+              </div>
+            ))}
+
+            {/* Current screen options */}
             {renderScreen()}
           </div>
 
-          {/* Footer - back to main */}
-          {screen !== "main" && (
-            <div className="p-2 border-t border-border shrink-0">
+          {/* Footer with input + back to main */}
+          <div className="border-t border-border shrink-0">
+            {screen !== "main" && (
               <button
                 onClick={resetChat}
-                className="w-full text-xs text-muted-foreground hover:text-foreground py-1.5 transition-colors"
+                className="w-full text-xs text-muted-foreground hover:text-foreground py-1.5 transition-colors border-b border-border"
               >
                 🏠 মূল মেনুতে ফিরুন
               </button>
+            )}
+            <div className="p-2 flex items-center gap-2">
+              <input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleChatSend()}
+                placeholder="আপনার প্রশ্ন লিখুন..."
+                className="flex-1 min-w-0 px-3 py-2 rounded-full bg-muted border border-border text-foreground text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+              <button
+                onClick={handleChatSend}
+                className="shrink-0 p-2.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              >
+                <Send className="h-4 w-4" />
+              </button>
             </div>
-          )}
+          </div>
         </div>
       )}
 
