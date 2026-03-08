@@ -19,14 +19,9 @@ export default function AdminDashboard() {
         getDocs(collection(db, "videos")),
         getDocs(query(collection(db, "enrollRequests"), where("status", "==", "pending"))),
       ]);
-      // Count unique users who have pending status OR pending enrollment requests
-      const allStudents = usersSnap.docs.map(d => ({ id: d.id, ...(d.data() as { status?: string }) }));
-      const pendingUserIds = new Set<string>();
-      allStudents.filter(u => u.status === "pending").forEach(u => pendingUserIds.add(u.id));
-      pendingRequestsSnap.docs.forEach(d => pendingUserIds.add(d.data().userId));
       setStats({
         users: usersSnap.size,
-        pending: pendingUserIds.size,
+        pending: pendingRequestsSnap.size,
         courses: coursesSnap.size,
         videos: videosSnap.size,
       });

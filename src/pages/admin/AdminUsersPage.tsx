@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { collection, getDocs, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
+import { collection, getDocs, updateDoc, deleteDoc, doc, query, where, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { UserDoc, EnrollRequest } from "@/types";
 import { toast } from "sonner";
@@ -80,6 +80,22 @@ export default function AdminUsersPage() {
 
   const handleRejectRequest = async (reqId: string, userId: string, courseName: string) => {
     await updateDoc(doc(db, "enrollRequests", reqId), { status: "rejected" });
+    // Remove the course from user's enrolledCourses
+    const req = enrollRequests.find(r => r.id === reqId);
+    if (req) {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data() as UserDoc;
+        const updatedCourses = (userData.enrolledCourses || []).filter(c => c.courseId !== req.courseId);
+        await updateDoc(userRef, { enrolledCourses: updatedCourses });
+        // If no approved courses left, set user status to rejected
+        const remainingApproved = enrollRequests.filter(r => r.userId === userId && r.id !== reqId && r.status === "approved");
+        if (remainingApproved.length === 0 && userData.status !== "approved") {
+          await updateDoc(userRef, { status: "rejected" });
+        }
+      }
+    }
     toast.success(`${courseName} rejected`);
     fetchData();
   };
@@ -100,6 +116,7 @@ export default function AdminUsersPage() {
   });
 
   const students = users.filter(u => u.role !== "admin");
+  const pendingRequestCount = enrollRequests.filter(r => r.status === "pending").length;
   const statusCounts = {
     all: students.length,
     pending: students.filter(u => u.status === "pending" || hasPendingRequest(u.id)).length,

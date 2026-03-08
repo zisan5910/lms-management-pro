@@ -153,7 +153,9 @@ export default function ProfilePage() {
         <div className="mt-6">
           <h3 className="font-semibold text-foreground mb-3">Enrolled Courses</h3>
           <div className="space-y-2">
-            {userDoc.enrolledCourses.map((c) => {
+            {userDoc.enrolledCourses
+              .filter((c) => courseRequestStatuses[c.courseId] !== "rejected")
+              .map((c) => {
               const reqStatus = courseRequestStatuses[c.courseId] || "approved";
               const isApproved = reqStatus === "approved";
               const isPending = reqStatus === "pending";
