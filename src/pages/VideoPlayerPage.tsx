@@ -408,6 +408,31 @@ export default function VideoPlayerPage() {
   );
 }
 
+function ChapterDropdown({ chapters, value, onChange }: { chapters: { chapterId: string; chapterName: string }[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-card border border-border text-foreground hover:bg-accent transition-colors">
+          <Filter className="h-3.5 w-3.5" />
+          <span className="max-w-[120px] truncate">{value === "All" ? "All Chapters" : value}</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="max-h-60 overflow-y-auto min-w-[180px]">
+        <DropdownMenuItem onClick={() => onChange("All")} className="flex items-center justify-between gap-2">
+          <span>All Chapters</span>
+          {value === "All" && <Check className="h-3.5 w-3.5 text-primary" />}
+        </DropdownMenuItem>
+        {chapters.map(ch => (
+          <DropdownMenuItem key={ch.chapterId} onClick={() => onChange(ch.chapterName)} className="flex items-center justify-between gap-2">
+            <span className="truncate">{ch.chapterName}</span>
+            {value === ch.chapterName && <Check className="h-3.5 w-3.5 text-primary" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function VideoListItem({ v, videoId, settings }: { v: Video; videoId?: string; settings: any }) {
   const navigate = useNavigate();
   return (
