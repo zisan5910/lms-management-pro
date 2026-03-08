@@ -20,11 +20,11 @@ export default function AdminDashboard() {
         getDocs(collection(db, "videos")),
         getDocs(query(collection(db, "enrollRequests"), where("status", "==", "pending"))),
       ]);
-      const allUsers = pendingSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-      const pendingUsers = allUsers.filter(u => u.status === "pending" && u.role === "student");
+      const allUsers = pendingSnap.docs.map(d => ({ id: d.id, ...d.data() } as any));
+      const pendingUsers = allUsers.filter((u: any) => u.status === "pending" && u.role === "student");
       // Also count approved users who have pending enrollment requests
       const pendingRequestUserIds = new Set(enrollRequestsSnap.docs.map(d => d.data().userId));
-      const approvedWithPending = allUsers.filter(u => u.role === "student" && u.status !== "pending" && pendingRequestUserIds.has(u.id));
+      const approvedWithPending = allUsers.filter((u: any) => u.role === "student" && u.status !== "pending" && pendingRequestUserIds.has(u.id));
       const pendingCount = pendingUsers.length + approvedWithPending.length;
       setStats({
         users: usersSnap.size,
