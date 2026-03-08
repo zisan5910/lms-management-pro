@@ -4,9 +4,9 @@ import { collection, query, where, getDocs, doc, getDoc } from "firebase/firesto
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Video, Course } from "@/types";
-import { useAppSettings } from "@/contexts/AppSettingsContext";
 import { VideoGridSkeleton } from "@/components/skeletons/VideoCardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { VideoCard } from "@/components/VideoCard";
 
 export default function CourseContentPage() {
   const { courseId } = useParams();
