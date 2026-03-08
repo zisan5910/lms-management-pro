@@ -116,6 +116,7 @@ export default function AdminUsersPage() {
   });
 
   const students = users.filter(u => u.role !== "admin");
+  const pendingRequestCount = enrollRequests.filter(r => r.status === "pending").length;
   const statusCounts = {
     all: students.length,
     pending: students.filter(u => u.status === "pending" || hasPendingRequest(u.id)).length,
