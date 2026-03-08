@@ -376,16 +376,12 @@ export default function VideoPlayerPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 lg:hidden">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-foreground">More Videos</h3>
-            {allChapters.length > 0 && (
-              <select value={chapterFilter} onChange={(e) => setChapterFilter(e.target.value)}
-                className="px-2 py-1 text-xs rounded-md bg-card border border-border text-foreground">
-                <option value="All">All Chapters</option>
-                {allChapters.map(ch => <option key={ch.chapterId} value={ch.chapterName}>{ch.chapterName}</option>)}
-              </select>
-            )}
-          </div>
+           <div className="flex items-center justify-between mb-3">
+             <h3 className="font-semibold text-foreground">More Videos</h3>
+             {allChapters.length > 0 && (
+               <ChapterDropdown chapters={allChapters} value={chapterFilter} onChange={setChapterFilter} />
+             )}
+           </div>
           <div className="space-y-2">
             {(chapterFilter === "All" ? relatedVideos : relatedVideos.filter(v => v.chapterName === chapterFilter)).map((v) => (
               <VideoListItem key={v.id} v={v} videoId={videoId} settings={settings} />
