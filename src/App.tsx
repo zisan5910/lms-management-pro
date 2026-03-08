@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppSettingsProvider } from "@/contexts/AppSettingsContext";
 import { AppLayout } from "@/components/AppLayout";
 import { ExternalRedirect } from "@/components/ExternalRedirect";
+import { ProtectedAdminRoute } from "@/components/ProtectedAdminRoute";
 import IndexRedirect from "@/pages/IndexRedirect";
 import HomePage from "@/pages/HomePage";
 import CourseDetailsPage from "@/pages/CourseDetailsPage";
@@ -46,14 +47,14 @@ const App = () => (
                 <Route path="/my-courses/:courseId" element={<CourseContentPage />} />
                 <Route path="/video/:videoId" element={<VideoPlayerPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<AdminUsersPage />} />
-                <Route path="/admin/courses" element={<AdminCoursesPage />} />
-                <Route path="/admin/videos" element={<AdminVideosPage />} />
-                <Route path="/admin/videos/add" element={<AdminAddVideoPage />} />
-                <Route path="/admin/settings" element={<AdminSettingsPage />} />
-                <Route path="/admin/pending" element={<AdminPendingPage />} />
-                <Route path="/admin/data" element={<AdminDataPage />} />
+                <Route path="/admin" element={<ProtectedAdminRoute><AdminDashboard /></ProtectedAdminRoute>} />
+                <Route path="/admin/users" element={<ProtectedAdminRoute><AdminUsersPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/courses" element={<ProtectedAdminRoute><AdminCoursesPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/videos" element={<ProtectedAdminRoute><AdminVideosPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/videos/add" element={<ProtectedAdminRoute><AdminAddVideoPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/settings" element={<ProtectedAdminRoute><AdminSettingsPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/pending" element={<ProtectedAdminRoute><AdminPendingPage /></ProtectedAdminRoute>} />
+                <Route path="/admin/data" element={<ProtectedAdminRoute><AdminDataPage /></ProtectedAdminRoute>} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
