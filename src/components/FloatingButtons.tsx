@@ -262,7 +262,6 @@ export function FloatingButtons({ course }: FloatingButtonsProps = {}) {
                 onClick={() => navigateTo("enrollment-guide")}
                 accent
               />
-              />
             </div>
           </div>
         );
