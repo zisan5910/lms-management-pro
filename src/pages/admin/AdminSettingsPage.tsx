@@ -49,7 +49,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="p-4 max-w-2xl mx-auto animate-fade-in">
+    <div className="p-3 sm:p-4 max-w-2xl mx-auto animate-fade-in overflow-x-hidden" style={{ maxWidth: '100vw' }}>
       <h2 className="text-xl font-semibold text-foreground mb-4">App Settings</h2>
 
       <div className="space-y-6">
