@@ -65,7 +65,7 @@ export default function AdminDashboard() {
             className="p-4 bg-card rounded-lg border border-border shadow-card"
           >
             <Youtube className="h-6 w-6 text-destructive mb-2" />
-            <p className="text-sm font-medium text-foreground">YouTube Channel</p>
+            <p className="text-sm font-medium text-foreground">YouTube</p>
             <p className="text-xs text-muted-foreground mt-1">Open in new tab</p>
           </a>
         )}

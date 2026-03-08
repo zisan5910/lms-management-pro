@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Course, Subject, Instructor, DiscussionGroup, Chapter } from "@/types";
@@ -32,9 +33,10 @@ const FormInput = ({ label, ...props }: { label?: string } & React.InputHTMLAttr
 );
 
 export default function AdminCoursesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(searchParams.get("add") === "true");
   const [editCourse, setEditCourse] = useState<Course | null>(null);
 
   const [courseName, setCourseName] = useState("");
@@ -67,7 +69,8 @@ export default function AdminCoursesPage() {
     setDiscussionGroups([{ name: "", link: "" }]); setRoutinePDF(""); setAllMaterialsLink(""); setEditCourse(null);
   };
 
-  const openAdd = () => { resetForm(); setShowForm(true); };
+  const openAdd = () => { resetForm(); setShowForm(true); searchParams.delete("add"); setSearchParams(searchParams, { replace: true }); };
+  const closeForm = () => { setShowForm(false); resetForm(); searchParams.delete("add"); setSearchParams(searchParams, { replace: true }); };
 
   const openEdit = (c: Course) => {
     setEditCourse(c); setCourseName(c.courseName); setThumbnailUrl(c.thumbnail); setPrice(c.price);
@@ -107,7 +110,7 @@ export default function AdminCoursesPage() {
         await addDoc(collection(db, "courses"), data);
         toast.success("Course added");
       }
-      setShowForm(false); resetForm(); fetchCourses();
+      closeForm(); fetchCourses();
     } catch (err: any) { toast.error(err.message); }
     setSubmitting(false);
   };
@@ -138,7 +141,7 @@ export default function AdminCoursesPage() {
       <div className="animate-fade-in w-full max-w-2xl mx-auto overflow-x-hidden overflow-y-auto pb-8 box-border">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
-          <button onClick={() => { setShowForm(false); resetForm(); }} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2 hover:text-foreground transition-colors">
+          <button onClick={closeForm} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2 hover:text-foreground transition-colors">
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
           <h2 className="text-lg font-semibold text-foreground">{editCourse ? "Edit Course" : "New Course"}</h2>
