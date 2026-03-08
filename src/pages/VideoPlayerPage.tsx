@@ -299,7 +299,7 @@ export default function VideoPlayerPage() {
   const nextVideo = currentIndex < relatedVideos.length - 1 ? relatedVideos[currentIndex + 1] : null;
 
   return (
-    <div className="animate-fade-in lg:flex lg:gap-4 lg:p-4 h-[calc(100vh-3.5rem)]" onContextMenu={(e) => e.preventDefault()}>
+    <div className={`animate-fade-in lg:flex lg:gap-4 lg:p-4 h-[calc(100vh-3.5rem)] ${isMobile ? 'flex flex-col overflow-hidden' : ''}`} onContextMenu={(e) => e.preventDefault()}>
       <div className="lg:flex-1 flex flex-col h-full">
         <div className="z-30 bg-background shrink-0">
           <div
@@ -375,7 +375,7 @@ export default function VideoPlayerPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 lg:hidden">
+        <div className="flex-1 overflow-y-auto pb-20 lg:pb-0 p-4 lg:hidden">
            <div className="flex items-center justify-between mb-3">
              <h3 className="font-semibold text-foreground">More Videos</h3>
              {allChapters.length > 0 && (
