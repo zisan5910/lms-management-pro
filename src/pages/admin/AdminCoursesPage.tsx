@@ -304,7 +304,7 @@ export default function AdminCoursesPage() {
 
   // ── Course List ──
   return (
-    <div className="p-4 animate-fade-in max-w-4xl mx-auto">
+    <div className="p-3 sm:p-4 animate-fade-in max-w-4xl mx-auto overflow-x-hidden w-full box-border">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground">Courses ({courses.length})</h2>
         <button onClick={openAdd} className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-all active:scale-95 shadow-sm font-medium">
