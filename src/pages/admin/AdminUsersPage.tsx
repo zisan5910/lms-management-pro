@@ -100,7 +100,7 @@ export default function AdminUsersPage() {
   const students = users.filter(u => u.role !== "admin");
   const statusCounts = {
     all: students.length,
-    pending: students.filter(u => u.status === "pending").length,
+    pending: students.filter(u => u.status === "pending" || hasPendingRequest(u.id)).length,
     approved: students.filter(u => u.status === "approved").length,
     rejected: students.filter(u => u.status === "rejected").length,
   };
