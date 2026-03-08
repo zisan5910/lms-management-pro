@@ -135,9 +135,9 @@ export default function AdminCoursesPage() {
   // ── Add/Edit Form ──
   if (showForm) {
     return (
-      <div className="animate-fade-in w-full max-w-2xl mx-auto overflow-x-hidden pb-8">
+      <div className="animate-fade-in w-full max-w-2xl mx-auto overflow-x-hidden overflow-y-auto pb-8" style={{ maxWidth: '100vw' }}>
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3 -mx-0">
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
           <button onClick={() => { setShowForm(false); resetForm(); }} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-2 hover:text-foreground transition-colors">
             <ChevronLeft className="h-4 w-4" /> Back
           </button>
