@@ -57,6 +57,21 @@ export default function ProfilePage() {
 
   const enrolledIds = userDoc.enrolledCourses?.map((c) => c.courseId) || [];
   const availableCourses = allCourses.filter((c) => !enrolledIds.includes(c.id));
+  const [courseRequestStatuses, setCourseRequestStatuses] = useState<Record<string, string>>({});
+
+  // Fetch enrollment request statuses for enrolled courses
+  useEffect(() => {
+    if (user && userDoc?.enrolledCourses?.length) {
+      getDocs(query(collection(db, "enrollRequests"), where("userId", "==", user.uid))).then((snap) => {
+        const statuses: Record<string, string> = {};
+        snap.docs.forEach((d) => {
+          const data = d.data();
+          statuses[data.courseId] = data.status;
+        });
+        setCourseRequestStatuses(statuses);
+      });
+    }
+  }, [user, userDoc?.enrolledCourses]);
 
   const handleLogout = async () => { await logout(); navigate("/"); };
   const handleResetPassword = async () => {
