@@ -88,10 +88,12 @@ export default function AdminSettingsPage() {
         <div className="bg-card rounded-lg border border-border p-4">
           <h3 className="text-sm font-medium text-foreground mb-3">Payment Methods</h3>
           {paymentMethods.map((pm, i) => (
-            <div key={i} className="flex gap-2 mt-2 flex-wrap sm:flex-nowrap">
-              <input value={pm.name} onChange={(e) => { const a = [...paymentMethods]; a[i] = { ...a[i], name: e.target.value }; setPaymentMethods(a); }} placeholder="Method Name" className="flex-1 min-w-[120px] px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm" />
-              <input value={pm.number} onChange={(e) => { const a = [...paymentMethods]; a[i] = { ...a[i], number: e.target.value }; setPaymentMethods(a); }} placeholder="Number" className="flex-1 min-w-[120px] px-3 py-2 rounded-md bg-background border border-border text-foreground text-sm" />
-              {paymentMethods.length > 1 && <button type="button" onClick={() => setPaymentMethods(paymentMethods.filter((_, j) => j !== i))} className="p-2 text-destructive"><X className="h-4 w-4" /></button>}
+            <div key={i} className="flex gap-2 mt-2 items-center">
+              <div className="flex-1 min-w-0 space-y-2 sm:space-y-0 sm:flex sm:gap-2">
+                <input value={pm.name} onChange={(e) => { const a = [...paymentMethods]; a[i] = { ...a[i], name: e.target.value }; setPaymentMethods(a); }} placeholder="Method Name" className="w-full sm:flex-1 px-3 py-2.5 rounded-lg bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input value={pm.number} onChange={(e) => { const a = [...paymentMethods]; a[i] = { ...a[i], number: e.target.value }; setPaymentMethods(a); }} placeholder="Number" className="w-full sm:flex-1 px-3 py-2.5 rounded-lg bg-background border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              {paymentMethods.length > 1 && <button type="button" onClick={() => setPaymentMethods(paymentMethods.filter((_, j) => j !== i))} className="p-2 text-destructive flex-shrink-0"><X className="h-4 w-4" /></button>}
             </div>
           ))}
           <button type="button" onClick={() => setPaymentMethods([...paymentMethods, { name: "", number: "" }])} className="text-xs text-primary mt-2">+ Add</button>
