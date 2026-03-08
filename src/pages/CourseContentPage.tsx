@@ -12,7 +12,7 @@ export default function CourseContentPage() {
   const { courseId } = useParams();
   const { user, userDoc } = useAuth();
   const navigate = useNavigate();
-  const settings = useAppSettings();
+  
   const [videos, setVideos] = useState<Video[]>([]);
   const [course, setCourse] = useState<Course | null>(null);
   const [subjects, setSubjects] = useState<string[]>([]);
