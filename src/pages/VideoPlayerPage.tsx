@@ -367,7 +367,7 @@ export default function VideoPlayerPage() {
               )}
               {!isMobile && (
                 <button onClick={() => navigate("/my-courses")}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md bg-accent border border-border text-foreground ml-auto">
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md bg-accent border border-border text-foreground">
                   <ArrowLeft className="h-4 w-4" /> My Courses
                 </button>
               )}

@@ -22,9 +22,12 @@ export function AppLayout() {
   const isVideoPage = pathname.startsWith("/video/");
   const showDesktopSidebar = !isMobile && !isAdmin && !isVideoPage;
 
+  // Hide hamburger menu on pages that already have a visible sidebar
+  const hasVisibleSidebar = (!isMobile && isAdmin) || showDesktopSidebar;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <TopNav onMenuClick={() => setSidebarOpen(true)} />
+      <TopNav onMenuClick={() => setSidebarOpen(true)} hideMenu={hasVisibleSidebar} />
       
       {isAdmin ? (
         <>
