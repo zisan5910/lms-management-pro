@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [courseRequestStatuses, setCourseRequestStatuses] = useState<Record<string, string>>({});
 
   useEffect(() => { if (!user) navigate("/auth?mode=login"); }, [user]);
 
@@ -43,7 +44,6 @@ export default function ProfilePage() {
     }
   }, [userDoc?.activeCourseId]);
 
-  // Fetch all courses when enroll dialog opens
   useEffect(() => {
     if (enrollOpen) {
       getDocs(collection(db, "courses")).then((snap) => {
@@ -53,25 +53,24 @@ export default function ProfilePage() {
     }
   }, [enrollOpen]);
 
-  if (!user || !userDoc) return null;
-
-  const enrolledIds = userDoc.enrolledCourses?.map((c) => c.courseId) || [];
-  const availableCourses = allCourses.filter((c) => !enrolledIds.includes(c.id));
-  const [courseRequestStatuses, setCourseRequestStatuses] = useState<Record<string, string>>({});
-
   // Fetch enrollment request statuses for enrolled courses
   useEffect(() => {
     if (user && userDoc?.enrolledCourses?.length) {
       getDocs(query(collection(db, "enrollRequests"), where("userId", "==", user.uid))).then((snap) => {
         const statuses: Record<string, string> = {};
         snap.docs.forEach((d) => {
-          const data = d.data();
+          const data = d.data() as { courseId: string; status: string };
           statuses[data.courseId] = data.status;
         });
         setCourseRequestStatuses(statuses);
       });
     }
   }, [user, userDoc?.enrolledCourses]);
+
+  if (!user || !userDoc) return null;
+
+  const enrolledIds = userDoc.enrolledCourses?.map((c) => c.courseId) || [];
+  const availableCourses = allCourses.filter((c) => !enrolledIds.includes(c.id));
 
   const handleLogout = async () => { await logout(); navigate("/"); };
   const handleResetPassword = async () => {
