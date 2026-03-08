@@ -22,7 +22,7 @@ import AdminCoursesPage from "@/pages/admin/AdminCoursesPage";
 import AdminVideosPage from "@/pages/admin/AdminVideosPage";
 import AdminAddVideoPage from "@/pages/admin/AdminAddVideoPage";
 import AdminSettingsPage from "@/pages/admin/AdminSettingsPage";
-import AdminPendingPage from "@/pages/admin/AdminPendingPage";
+
 import AdminDataPage from "@/pages/admin/AdminDataPage";
 import NotFound from "@/pages/NotFound";
 
@@ -53,7 +53,7 @@ const App = () => (
                 <Route path="/admin/videos" element={<ProtectedAdminRoute><AdminVideosPage /></ProtectedAdminRoute>} />
                 <Route path="/admin/videos/add" element={<ProtectedAdminRoute><AdminAddVideoPage /></ProtectedAdminRoute>} />
                 <Route path="/admin/settings" element={<ProtectedAdminRoute><AdminSettingsPage /></ProtectedAdminRoute>} />
-                <Route path="/admin/pending" element={<ProtectedAdminRoute><AdminPendingPage /></ProtectedAdminRoute>} />
+                
                 <Route path="/admin/data" element={<ProtectedAdminRoute><AdminDataPage /></ProtectedAdminRoute>} />
               </Route>
               <Route path="*" element={<NotFound />} />

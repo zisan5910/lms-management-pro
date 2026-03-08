@@ -85,27 +85,3 @@ export function AdminCourseListSkeleton({ count = 4 }: { count?: number }) {
     </div>
   );
 }
-
-export function AdminPendingSkeleton({ count = 4 }: { count?: number }) {
-  return (
-    <div className="p-4 space-y-4">
-      <Skeleton className="h-7 w-48" />
-      <div className="space-y-2">
-        {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="p-3 bg-card rounded-lg border border-border flex items-center justify-between">
-            <div className="space-y-1">
-              <Skeleton className="h-4 w-28" />
-              <Skeleton className="h-3 w-40" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-            <div className="flex gap-1">
-              <Skeleton className="h-8 w-8 rounded-md" />
-              <Skeleton className="h-8 w-8 rounded-md" />
-              <Skeleton className="h-8 w-8 rounded-md" />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
