@@ -41,8 +41,8 @@ export async function registerSession(uid: string): Promise<string> {
   });
 
   // If already at or above limit, delete ALL old sessions
-  if (snap.size >= MAX_SESSIONS) {
-    const deletePromises = snap.docs.map((d) => deleteDoc(doc(db, SESSIONS_COLLECTION, d.id)));
+  if (sortedDocs.length >= MAX_SESSIONS) {
+    const deletePromises = sortedDocs.map((d) => deleteDoc(doc(db, SESSIONS_COLLECTION, d.id)));
     await Promise.all(deletePromises);
   }
 
