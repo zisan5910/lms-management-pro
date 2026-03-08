@@ -51,8 +51,8 @@ export function UserSidebar({ open, onClose }: Props) {
   return (
     <>
       <div className="fixed inset-0 bg-foreground/20 z-50" onClick={onClose} />
-      <div className="fixed top-0 left-0 bottom-0 w-72 bg-background z-50 border-r border-border overflow-y-auto animate-fade-in">
-        <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="fixed top-0 left-0 bottom-0 w-72 bg-background z-50 border-r border-border flex flex-col animate-fade-in">
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <h2 className="font-semibold text-foreground">{settings.appName || "LMS"}</h2>
           <button onClick={onClose}><X className="h-5 w-5 text-muted-foreground" /></button>
         </div>
