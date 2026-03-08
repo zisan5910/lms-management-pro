@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, setDoc, deleteDoc, doc, orderBy, limit, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, setDoc, deleteDoc, doc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 const SESSIONS_COLLECTION = "userSessions";
