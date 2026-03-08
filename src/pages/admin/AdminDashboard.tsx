@@ -19,9 +19,11 @@ export default function AdminDashboard() {
         getDocs(collection(db, "courses")),
         getDocs(collection(db, "videos")),
       ]);
+      const allUsers = pendingSnap.docs.map(d => d.data());
+      const pendingCount = allUsers.filter(u => u.status === "pending" && u.role === "student").length;
       setStats({
         users: usersSnap.size,
-        pending: pendingSnap.size,
+        pending: pendingCount,
         courses: coursesSnap.size,
         videos: videosSnap.size,
       });
