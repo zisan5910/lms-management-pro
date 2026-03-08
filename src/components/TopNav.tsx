@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
   onMenuClick: () => void;
+  hideMenu?: boolean;
 }
 
 export function TopNav({ onMenuClick }: Props) {
