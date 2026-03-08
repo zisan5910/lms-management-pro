@@ -90,7 +90,10 @@ export default function AdminUsersPage() {
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
       u.enrolledCourses?.some((c) => c.courseName.toLowerCase().includes(search.toLowerCase()));
-    const matchesStatus = statusFilter === "all" || u.status === statusFilter;
+    const userHasPendingRequest = hasPendingRequest(u.id);
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "pending" ? (u.status === "pending" || userHasPendingRequest) : u.status === statusFilter);
     return matchesSearch && matchesStatus;
   });
 
