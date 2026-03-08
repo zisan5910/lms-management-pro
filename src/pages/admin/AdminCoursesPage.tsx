@@ -110,7 +110,7 @@ export default function AdminCoursesPage() {
         await addDoc(collection(db, "courses"), data);
         toast.success("Course added");
       }
-      setShowForm(false); resetForm(); fetchCourses();
+      closeForm(); fetchCourses();
     } catch (err: any) { toast.error(err.message); }
     setSubmitting(false);
   };
