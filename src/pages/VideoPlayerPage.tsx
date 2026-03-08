@@ -375,7 +375,7 @@ export default function VideoPlayerPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto pb-20 lg:pb-0 p-4 lg:hidden">
+        <div className="flex-1 overflow-y-auto pb-2 lg:pb-0 p-4 lg:hidden">
            <div className="flex items-center justify-between mb-3">
              <h3 className="font-semibold text-foreground">More Videos</h3>
              {allChapters.length > 0 && (
