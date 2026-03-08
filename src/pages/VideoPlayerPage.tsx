@@ -5,7 +5,13 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Video, Course } from "@/types";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
-import { ChevronLeft, ChevronRight, FileText, Play, Pause, Maximize, Minimize, RotateCcw, RotateCw, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileText, Play, Pause, Maximize, Minimize, RotateCcw, RotateCw, ArrowLeft, Filter, Check } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { FloatingButtons } from "@/components/FloatingButtons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { VideoPlayerSkeleton } from "@/components/skeletons/VideoPlayerSkeleton";
@@ -295,7 +301,7 @@ export default function VideoPlayerPage() {
   return (
     <div className="animate-fade-in lg:flex lg:gap-4 lg:p-4 h-[calc(100vh-3.5rem)]" onContextMenu={(e) => e.preventDefault()}>
       <div className="lg:flex-1 flex flex-col h-full">
-        <div className="sticky top-14 z-30 bg-background shrink-0">
+        <div className="z-30 bg-background shrink-0">
           <div
             ref={containerRef}
             className="relative aspect-video bg-black overflow-hidden select-none"
@@ -370,16 +376,12 @@ export default function VideoPlayerPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 lg:hidden">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-foreground">More Videos</h3>
-            {allChapters.length > 0 && (
-              <select value={chapterFilter} onChange={(e) => setChapterFilter(e.target.value)}
-                className="px-2 py-1 text-xs rounded-md bg-card border border-border text-foreground">
-                <option value="All">All Chapters</option>
-                {allChapters.map(ch => <option key={ch.chapterId} value={ch.chapterName}>{ch.chapterName}</option>)}
-              </select>
-            )}
-          </div>
+           <div className="flex items-center justify-between mb-3">
+             <h3 className="font-semibold text-foreground">More Videos</h3>
+             {allChapters.length > 0 && (
+               <ChapterDropdown chapters={allChapters} value={chapterFilter} onChange={setChapterFilter} />
+             )}
+           </div>
           <div className="space-y-2">
             {(chapterFilter === "All" ? relatedVideos : relatedVideos.filter(v => v.chapterName === chapterFilter)).map((v) => (
               <VideoListItem key={v.id} v={v} videoId={videoId} settings={settings} />
@@ -389,16 +391,12 @@ export default function VideoPlayerPage() {
       </div>
 
       <div className="hidden lg:block lg:w-80 overflow-y-auto h-full">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-foreground">More Videos</h3>
-          {allChapters.length > 0 && (
-            <select value={chapterFilter} onChange={(e) => setChapterFilter(e.target.value)}
-              className="px-2 py-1 text-xs rounded-md bg-card border border-border text-foreground">
-              <option value="All">All Chapters</option>
-              {allChapters.map(ch => <option key={ch.chapterId} value={ch.chapterName}>{ch.chapterName}</option>)}
-            </select>
-          )}
-        </div>
+         <div className="flex items-center justify-between mb-3">
+           <h3 className="font-semibold text-foreground">More Videos</h3>
+           {allChapters.length > 0 && (
+             <ChapterDropdown chapters={allChapters} value={chapterFilter} onChange={setChapterFilter} />
+           )}
+         </div>
         <div className="space-y-2">
           {(chapterFilter === "All" ? relatedVideos : relatedVideos.filter(v => v.chapterName === chapterFilter)).map((v) => (
             <VideoListItem key={v.id} v={v} videoId={videoId} settings={settings} />
@@ -407,6 +405,31 @@ export default function VideoPlayerPage() {
       </div>
       <FloatingButtons />
     </div>
+  );
+}
+
+function ChapterDropdown({ chapters, value, onChange }: { chapters: { chapterId: string; chapterName: string }[]; value: string; onChange: (v: string) => void }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-card border border-border text-foreground hover:bg-accent transition-colors">
+          <Filter className="h-3.5 w-3.5" />
+          <span className="max-w-[120px] truncate">{value === "All" ? "All Chapters" : value}</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="max-h-60 overflow-y-auto min-w-[180px]">
+        <DropdownMenuItem onClick={() => onChange("All")} className="flex items-center justify-between gap-2">
+          <span>All Chapters</span>
+          {value === "All" && <Check className="h-3.5 w-3.5 text-primary" />}
+        </DropdownMenuItem>
+        {chapters.map(ch => (
+          <DropdownMenuItem key={ch.chapterId} onClick={() => onChange(ch.chapterName)} className="flex items-center justify-between gap-2">
+            <span className="truncate">{ch.chapterName}</span>
+            {value === ch.chapterName && <Check className="h-3.5 w-3.5 text-primary" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
