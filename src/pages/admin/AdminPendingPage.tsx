@@ -22,9 +22,28 @@ export default function AdminPendingPage() {
   useEffect(() => { fetchRequests(); }, []);
 
   const handleApprove = async (req: EnrollRequest) => {
+    // Update enrollRequest status
     await updateDoc(doc(db, "enrollRequests", req.id), { status: "approved" });
-    await updateDoc(doc(db, "users", req.userId), { status: "approved" });
-    toast.success(`${req.name} approved`);
+
+    // Get course thumbnail
+    let courseThumbnail = "";
+    try {
+      const courseSnap = await getDoc(doc(db, "courses", req.courseId));
+      if (courseSnap.exists()) courseThumbnail = courseSnap.data().thumbnail || "";
+    } catch {}
+
+    // Add course to user's enrolledCourses
+    await updateDoc(doc(db, "users", req.userId), {
+      status: "approved",
+      enrolledCourses: arrayUnion({
+        courseId: req.courseId,
+        courseName: req.courseName,
+        courseThumbnail,
+        enrolledAt: Timestamp.now(),
+      }),
+    });
+
+    toast.success(`${req.name} approved for ${req.courseName}`);
     fetchRequests();
   };
 
