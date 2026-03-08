@@ -33,9 +33,10 @@ const FormInput = ({ label, ...props }: { label?: string } & React.InputHTMLAttr
 );
 
 export default function AdminCoursesPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(searchParams.get("add") === "true");
   const [editCourse, setEditCourse] = useState<Course | null>(null);
 
   const [courseName, setCourseName] = useState("");
