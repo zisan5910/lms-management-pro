@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, User, Menu, LayoutDashboard, Upload, Clock, MoreHorizontal } from "lucide-react";
+import { Home, BookOpen, User, LayoutDashboard, Upload, Clock, PlusCircle, MoreHorizontal } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const userTabs = [
@@ -12,6 +12,7 @@ const adminTabs = [
   { to: "/admin", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/admin/videos/add", icon: Upload, label: "Upload" },
   { to: "/admin/pending", icon: Clock, label: "Pending" },
+  { to: "/admin/courses?add=true", icon: PlusCircle, label: "Add Course" },
 ];
 
 interface Props {
@@ -28,7 +29,7 @@ export function BottomNav({ onMoreClick }: Props) {
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border pb-safe">
       <div className="flex items-center justify-around h-14">
         {tabs.map((tab) => {
-          const active = pathname === tab.to || (tab.to !== "/" && pathname.startsWith(tab.to));
+          const active = pathname === tab.to || (tab.to !== "/" && pathname.startsWith(tab.to.split("?")[0]));
           return (
             <Link
               key={tab.to}
@@ -42,13 +43,15 @@ export function BottomNav({ onMoreClick }: Props) {
             </Link>
           );
         })}
-        <button
-          onClick={onMoreClick}
-          className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-muted-foreground"
-        >
-          <MoreHorizontal className="h-5 w-5" />
-          <span>More</span>
-        </button>
+        {!isAdmin && (
+          <button
+            onClick={onMoreClick}
+            className="flex flex-col items-center gap-0.5 px-3 py-1 text-xs text-muted-foreground"
+          >
+            <MoreHorizontal className="h-5 w-5" />
+            <span>More</span>
+          </button>
+        )}
       </div>
     </nav>
   );
