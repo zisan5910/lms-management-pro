@@ -31,7 +31,7 @@ export function AppLayout() {
           {isMobile && <AdminSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />}
           <div className="flex flex-1">
             {!isMobile && <AdminSidebar open={true} onClose={() => {}} />}
-            <main className="flex-1 pb-16">
+            <main className="flex-1 pb-16 overflow-x-hidden">
               <Outlet />
             </main>
           </div>
@@ -41,7 +41,7 @@ export function AppLayout() {
           <UserSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
           <div className="flex flex-1">
             {showDesktopSidebar && <DesktopUserSidebar />}
-            <main className={`flex-1 ${showBottomNav ? "pb-16" : ""}`}>
+            <main className={`flex-1 overflow-x-hidden ${showBottomNav ? "pb-16" : ""}`}>
               <Outlet />
             </main>
           </div>
