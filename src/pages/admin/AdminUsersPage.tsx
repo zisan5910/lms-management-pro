@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { collection, getDocs, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
+import { collection, getDocs, updateDoc, deleteDoc, doc, query, where, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { UserDoc, EnrollRequest } from "@/types";
 import { toast } from "sonner";
