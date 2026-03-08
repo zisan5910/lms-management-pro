@@ -284,36 +284,40 @@ export default function ProfilePage() {
         </Dialog>
       </div>
 
-      {activeCourse?.allMaterialsLink && (
-        <div className="mt-6">
-          <h3 className="font-semibold text-foreground mb-3">All Materials</h3>
-          <div className="space-y-2">
-            <a href={activeCourse.allMaterialsLink} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-sm text-foreground hover:bg-accent">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              All Materials PDF
-              <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
-            </a>
-          </div>
-        </div>
-      )}
+      {activeCourse && courseRequestStatuses[activeCourse.id] !== "pending" && (
+        <>
+          {activeCourse.allMaterialsLink && (
+            <div className="mt-6">
+              <h3 className="font-semibold text-foreground mb-3">All Materials</h3>
+              <div className="space-y-2">
+                <a href={activeCourse.allMaterialsLink} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-sm text-foreground hover:bg-accent">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  All Materials PDF
+                  <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
+                </a>
+              </div>
+            </div>
+          )}
 
-      <div className="mt-6 space-y-2">
-        {activeCourse?.routinePDF && (
-          <a href={activeCourse.routinePDF} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-sm text-foreground">
-            <FileText className="h-4 w-4 text-muted-foreground" /> Routine PDF
-            <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
-          </a>
-        )}
-        {activeCourse?.discussionGroups?.filter(g => g.name && g.link).map((g, i) => (
-          <a key={i} href={g.link} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-sm text-foreground">
-            <MessageCircle className="h-4 w-4 text-muted-foreground" /> {g.name}
-            <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
-          </a>
-        ))}
-      </div>
+          <div className="mt-6 space-y-2">
+            {activeCourse.routinePDF && (
+              <a href={activeCourse.routinePDF} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-sm text-foreground">
+                <FileText className="h-4 w-4 text-muted-foreground" /> Routine PDF
+                <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
+              </a>
+            )}
+            {activeCourse.discussionGroups?.filter(g => g.name && g.link).map((g, i) => (
+              <a key={i} href={g.link} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg text-sm text-foreground">
+                <MessageCircle className="h-4 w-4 text-muted-foreground" /> {g.name}
+                <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
+              </a>
+            ))}
+          </div>
+        </>
+      )}
 
       <div className="mt-6 space-y-2">
         <button onClick={handleResetPassword} className="flex items-center gap-3 w-full p-3 bg-card border border-border rounded-lg text-sm text-foreground">
