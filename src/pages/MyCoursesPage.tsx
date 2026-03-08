@@ -144,12 +144,12 @@ export default function MyCoursesPage() {
         {filtered.length === 0 ? (
           <p className="text-center text-muted-foreground py-8">No videos found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
             {filtered.map((video) => (
               <button
                 key={video.id}
                 onClick={() => navigate(`/video/${video.id}`)}
-                className="bg-card rounded-xl overflow-hidden border border-border text-left group hover:shadow-md transition-all w-full"
+                className="bg-card rounded-lg sm:rounded-xl overflow-hidden border border-border text-left group hover:shadow-lg hover:border-primary/20 transition-all duration-200 w-full active:scale-[0.98]"
               >
                 <div className="relative w-full aspect-video overflow-hidden">
                   {video.thumbnail ? (
@@ -160,13 +160,9 @@ export default function MyCoursesPage() {
                     </div>
                   )}
                 </div>
-                <div className="p-3">
-                  <p className="text-sm font-medium text-foreground line-clamp-2">{video.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {video.subjectName}
-                    {video.chapterName ? ` • ${video.chapterName}` : ""}
-                    {" • "}{settings.appName || "LMS"}
-                  </p>
+                <div className="px-3 py-2.5 sm:p-3">
+                  <p className="text-sm font-medium text-foreground line-clamp-2 leading-snug">{video.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{settings.appName || "LMS"}</p>
                 </div>
               </button>
             ))}
