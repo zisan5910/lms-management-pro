@@ -22,7 +22,7 @@ import AdminCoursesPage from "@/pages/admin/AdminCoursesPage";
 import AdminVideosPage from "@/pages/admin/AdminVideosPage";
 import AdminAddVideoPage from "@/pages/admin/AdminAddVideoPage";
 import AdminSettingsPage from "@/pages/admin/AdminSettingsPage";
-import AdminPendingPage from "@/pages/admin/AdminPendingPage";
+
 import AdminDataPage from "@/pages/admin/AdminDataPage";
 import NotFound from "@/pages/NotFound";
 
