@@ -113,7 +113,7 @@ export default function AuthPage() {
         paymentInfo: { method: paymentMethod, paymentNumber, transactionId, screenshot: screenshotUrl },
       });
       toast.success("Registration successful! Waiting for approval.");
-      navigate(`/course/${courseId}`);
+      navigate("/profile");
     } catch (err: any) {
       toast.error(err.message || "Registration failed");
     }

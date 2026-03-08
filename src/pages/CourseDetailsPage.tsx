@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { Course } from "@/types";
-import { FileText, Users } from "lucide-react";
+import { FileText, Users, Clock } from "lucide-react";
 import { CourseDetailsSkeleton } from "@/components/skeletons/CourseDetailsSkeleton";
 import { FloatingButtons } from "@/components/FloatingButtons";
 
@@ -14,16 +14,25 @@ export default function CourseDetailsPage() {
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       if (!courseId) return;
       const snap = await getDoc(doc(db, "courses", courseId));
       if (snap.exists()) setCourse({ id: snap.id, ...snap.data() } as Course);
+      
+      // Check if user has a pending enroll request for this course
+      if (user) {
+        const q = query(collection(db, "enrollRequests"), where("userId", "==", user.uid), where("courseId", "==", courseId), where("status", "==", "pending"));
+        const reqSnap = await getDocs(q);
+        setHasPendingRequest(!reqSnap.empty);
+      }
+      
       setLoading(false);
     };
-    fetch();
-  }, [courseId]);
+    fetchData();
+  }, [courseId, user]);
 
   if (loading) return <CourseDetailsSkeleton />;
   if (!course) return <div className="p-4 text-center text-muted-foreground">Course not found.</div>;
@@ -87,10 +96,14 @@ export default function CourseDetailsPage() {
       )}
 
       <div className="mt-6">
-        {isEnrolled ? (
+        {isEnrolled && !hasPendingRequest ? (
           <Link to="/my-courses" className="inline-block px-6 py-3 text-sm font-medium rounded-md bg-success text-success-foreground">
             Visit Course
           </Link>
+        ) : hasPendingRequest ? (
+          <div className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-md bg-warning/15 text-warning border border-warning/30">
+            <Clock className="h-4 w-4" /> Pending Approval
+          </div>
         ) : (
           <button onClick={handleEnroll} className="px-6 py-3 text-sm font-medium rounded-md bg-primary text-primary-foreground">
             Enroll Now
