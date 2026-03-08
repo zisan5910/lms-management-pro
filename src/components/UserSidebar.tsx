@@ -57,7 +57,7 @@ export function UserSidebar({ open, onClose }: Props) {
           <button onClick={onClose}><X className="h-5 w-5 text-muted-foreground" /></button>
         </div>
 
-        <nav className="p-2">
+        <nav className="p-2 flex-1 overflow-y-auto pb-20">
           <SidebarLink to="/home" icon={Home} label="Home" onClick={onClose} />
           <SidebarLink to="/my-courses" icon={BookOpen} label="My Courses" onClick={onClose} />
           <SidebarLink to="/profile" icon={User} label="Profile" onClick={onClose} />
