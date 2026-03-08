@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { collection, getDocs, updateDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, updateDoc, deleteDoc, doc, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { UserDoc } from "@/types";
+import { UserDoc, EnrollRequest } from "@/types";
 import { toast } from "sonner";
-import { Check, X, Trash2, Eye, ChevronLeft, Filter, Search, Users } from "lucide-react";
+import { Check, X, Trash2, Eye, ChevronLeft, Search, Users, BookOpen } from "lucide-react";
 import { AdminListSkeleton } from "@/components/skeletons/AdminSkeleton";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -14,11 +14,17 @@ import { ImagePreview } from "@/components/ImagePreview";
 
 interface UserWithId extends UserDoc { id: string; }
 
+interface UserEnrollments {
+  user: UserWithId;
+  enrollRequests: EnrollRequest[];
+}
+
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
 export default function AdminUsersPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [users, setUsers] = useState<UserWithId[]>([]);
+  const [enrollRequests, setEnrollRequests] = useState<EnrollRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const initialStatus = (searchParams.get("status") as StatusFilter) || "all";
@@ -27,33 +33,59 @@ export default function AdminUsersPage() {
   );
   const [selectedUser, setSelectedUser] = useState<UserWithId | null>(null);
 
-  const fetchUsers = async () => {
-    const snap = await getDocs(collection(db, "users"));
-    setUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() } as UserWithId)));
+  const fetchData = async () => {
+    const [usersSnap, requestsSnap] = await Promise.all([
+      getDocs(collection(db, "users")),
+      getDocs(collection(db, "enrollRequests")),
+    ]);
+    setUsers(usersSnap.docs.map((d) => ({ id: d.id, ...d.data() } as UserWithId)));
+    setEnrollRequests(requestsSnap.docs.map((d) => ({ id: d.id, ...d.data() } as EnrollRequest)));
     setLoading(false);
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchData(); }, []);
+
+  const getUserRequests = (userId: string) => enrollRequests.filter(r => r.userId === userId);
+  const hasPendingRequest = (userId: string) => getUserRequests(userId).some(r => r.status === "pending");
+  const hasApprovedRequest = (userId: string) => getUserRequests(userId).some(r => r.status === "approved");
 
   const handleApprove = async (userId: string) => {
     await updateDoc(doc(db, "users", userId), { status: "approved" });
     toast.success("User approved");
-    fetchUsers();
+    fetchData();
   };
 
   const handleReject = async (userId: string) => {
     await updateDoc(doc(db, "users", userId), { status: "rejected" });
     toast.success("User rejected");
-    fetchUsers();
+    fetchData();
   };
 
   const handleDelete = async (userId: string) => {
     await deleteDoc(doc(db, "users", userId));
     toast.success("User deleted");
-    fetchUsers();
+    fetchData();
+  };
+
+  const handleApproveRequest = async (reqId: string, userId: string, courseName: string) => {
+    await updateDoc(doc(db, "enrollRequests", reqId), { status: "approved" });
+    // Ensure user is approved
+    const userDoc = users.find(u => u.id === userId);
+    if (userDoc?.status !== "approved") {
+      await updateDoc(doc(db, "users", userId), { status: "approved" });
+    }
+    toast.success(`${courseName} approved`);
+    fetchData();
+  };
+
+  const handleRejectRequest = async (reqId: string, userId: string, courseName: string) => {
+    await updateDoc(doc(db, "enrollRequests", reqId), { status: "rejected" });
+    toast.success(`${courseName} rejected`);
+    fetchData();
   };
 
   const filtered = users.filter((u) => {
+    if (u.role === "admin") return false;
     const matchesSearch =
       u.name?.toLowerCase().includes(search.toLowerCase()) ||
       u.email?.toLowerCase().includes(search.toLowerCase()) ||
@@ -62,17 +94,23 @@ export default function AdminUsersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const students = users.filter(u => u.role !== "admin");
   const statusCounts = {
-    all: users.length,
-    pending: users.filter(u => u.status === "pending").length,
-    approved: users.filter(u => u.status === "approved").length,
-    rejected: users.filter(u => u.status === "rejected").length,
+    all: students.length,
+    pending: students.filter(u => u.status === "pending").length,
+    approved: students.filter(u => u.status === "approved").length,
+    rejected: students.filter(u => u.status === "rejected").length,
   };
 
   if (loading) return <AdminListSkeleton count={6} />;
 
   // Full detail view
   if (selectedUser) {
+    const userRequests = getUserRequests(selectedUser.id);
+    const pendingReqs = userRequests.filter(r => r.status === "pending");
+    const approvedReqs = userRequests.filter(r => r.status === "approved");
+    const rejectedReqs = userRequests.filter(r => r.status === "rejected");
+
     return (
       <div className="p-3 sm:p-4 animate-fade-in max-w-2xl mx-auto overflow-x-hidden">
         <button onClick={() => setSelectedUser(null)} className="flex items-center gap-1 text-sm text-muted-foreground mb-4 hover:text-foreground transition-colors">
@@ -96,25 +134,93 @@ export default function AdminUsersPage() {
             </div>
           </div>
 
-          <div className="p-4 sm:p-6 space-y-4 overflow-y-auto max-h-[60vh]">
+          <div className="p-4 sm:p-6 space-y-5 overflow-y-auto max-h-[60vh]">
             <DetailRow label="Role" value={selectedUser.role} />
-            <DetailRow label="Status" value={selectedUser.status} />
+            <DetailRow label="Created At" value={selectedUser.createdAt?.toDate?.()?.toLocaleString?.() || "—"} />
 
+            {/* Enrolled Courses */}
             {selectedUser.enrolledCourses?.length > 0 && (
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Enrolled Courses</p>
-                <div className="space-y-1">
-                  {selectedUser.enrolledCourses.map((c, i) => (
-                    <div key={i} className="flex items-center gap-2 p-2 bg-accent/50 rounded-lg">
-                      {c.courseThumbnail && <img src={c.courseThumbnail} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />}
-                      <span className="text-sm text-foreground truncate">{c.courseName}</span>
-                    </div>
-                  ))}
+                <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Enrolled Courses ({selectedUser.enrolledCourses.length})</p>
+                <div className="space-y-2">
+                  {selectedUser.enrolledCourses.map((c, i) => {
+                    const courseReq = userRequests.find(r => r.courseId === c.courseId);
+                    const reqStatus = courseReq?.status || "approved";
+                    return (
+                      <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg border ${
+                        reqStatus === "approved" ? "bg-success/5 border-success/20" :
+                        reqStatus === "pending" ? "bg-warning/5 border-warning/20" :
+                        "bg-destructive/5 border-destructive/20"
+                      }`}>
+                        {c.courseThumbnail && <img src={c.courseThumbnail} alt="" className="w-10 h-10 rounded-md object-cover flex-shrink-0" />}
+                        <div className="flex-1 min-w-0">
+                          <span className="text-sm text-foreground truncate block">{c.courseName}</span>
+                          <span className={`text-[11px] ${
+                            reqStatus === "approved" ? "text-success" :
+                            reqStatus === "pending" ? "text-warning" :
+                            "text-destructive"
+                          }`}>{reqStatus}</span>
+                        </div>
+                        {reqStatus === "pending" && courseReq && (
+                          <div className="flex gap-1 flex-shrink-0">
+                            <button onClick={() => handleApproveRequest(courseReq.id, selectedUser.id, c.courseName)} className="p-1.5 rounded-md hover:bg-accent"><Check className="h-4 w-4 text-success" /></button>
+                            <button onClick={() => handleRejectRequest(courseReq.id, selectedUser.id, c.courseName)} className="p-1.5 rounded-md hover:bg-accent"><X className="h-4 w-4 text-destructive" /></button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {selectedUser.paymentInfo && (
+            {/* Pending Enrollment Requests with Payment Details */}
+            {pendingReqs.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Pending Payment Details</p>
+                {pendingReqs.map((req) => (
+                  <div key={req.id} className="p-3 bg-warning/5 border border-warning/20 rounded-lg space-y-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-warning" />
+                      <span className="text-sm font-medium text-foreground">{req.courseName}</span>
+                    </div>
+                    <div className="ml-6 space-y-1.5">
+                      <DetailRow label="Payment Method" value={req.paymentMethod} />
+                      <DetailRow label="Payment Number" value={req.paymentNumber} />
+                      <DetailRow label="Transaction ID" value={req.transactionId} />
+                      {req.screenshot && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Screenshot</p>
+                          <ImagePreview file={null} url={req.screenshot} size="lg" />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Approved Enrollment Details */}
+            {approvedReqs.length > 0 && (
+              <div>
+                <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Approved Enrollments</p>
+                {approvedReqs.map((req) => (
+                  <div key={req.id} className="p-3 bg-success/5 border border-success/20 rounded-lg space-y-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4 text-success" />
+                      <span className="text-sm font-medium text-foreground">{req.courseName}</span>
+                    </div>
+                    <div className="ml-6 space-y-1.5">
+                      <DetailRow label="Payment Method" value={req.paymentMethod} />
+                      <DetailRow label="Transaction ID" value={req.transactionId} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Original Payment Info */}
+            {selectedUser.paymentInfo && !userRequests.some(r => r.courseId) && (
               <>
                 <div className="border-t border-border pt-4">
                   <p className="text-xs text-muted-foreground font-medium uppercase mb-2">Payment Information</p>
@@ -130,8 +236,6 @@ export default function AdminUsersPage() {
                 )}
               </>
             )}
-
-            <DetailRow label="Created At" value={selectedUser.createdAt?.toDate?.()?.toLocaleString?.() || "—"} />
           </div>
 
           <div className="p-4 border-t border-border flex gap-2 flex-wrap">
@@ -170,11 +274,10 @@ export default function AdminUsersPage() {
     <div className="p-3 sm:p-4 animate-fade-in max-w-4xl mx-auto overflow-x-hidden">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-          <Users className="h-5 w-5" /> Users ({users.length})
+          <Users className="h-5 w-5" /> Users ({students.length})
         </h2>
       </div>
 
-      {/* Search */}
       <div className="relative mb-3">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
@@ -186,7 +289,6 @@ export default function AdminUsersPage() {
         />
       </div>
 
-      {/* Status Filter Chips */}
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
         {(["all", "pending", "approved", "rejected"] as StatusFilter[]).map((status) => (
           <button
@@ -204,32 +306,39 @@ export default function AdminUsersPage() {
         ))}
       </div>
 
-      {/* User List */}
       <div className="space-y-2">
         {filtered.length === 0 && (
           <div className="text-center py-8 text-muted-foreground text-sm">No users found</div>
         )}
-        {filtered.map((u) => (
-          <button key={u.id} onClick={() => setSelectedUser(u)} className="w-full text-left p-3 bg-card rounded-xl border border-border flex items-center gap-3 hover:bg-accent/50 transition-colors">
-            <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold flex-shrink-0">
-              {u.name?.[0]?.toUpperCase() || "U"}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground text-sm truncate">{u.name}</p>
-              <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-              {u.enrolledCourses?.[0] && (
-                <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5">{u.enrolledCourses[0].courseName}</p>
-              )}
-            </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium ${
-              u.status === "approved" ? "bg-success/10 text-success" :
-              u.status === "pending" ? "bg-warning/10 text-warning" :
-              "bg-destructive/10 text-destructive"
-            }`}>
-              {u.status}
-            </span>
-          </button>
-        ))}
+        {filtered.map((u) => {
+          const pendingCount = getUserRequests(u.id).filter(r => r.status === "pending").length;
+          return (
+            <button key={u.id} onClick={() => setSelectedUser(u)} className="w-full text-left p-3 bg-card rounded-xl border border-border flex items-center gap-3 hover:bg-accent/50 transition-colors">
+              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                {u.name?.[0]?.toUpperCase() || "U"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-foreground text-sm truncate">{u.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                {u.enrolledCourses?.length > 0 && (
+                  <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5">
+                    {u.enrolledCourses.map(c => c.courseName).join(", ")}
+                  </p>
+                )}
+                {pendingCount > 0 && (
+                  <p className="text-[11px] text-warning mt-0.5">{pendingCount} pending request{pendingCount > 1 ? "s" : ""}</p>
+                )}
+              </div>
+              <span className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 font-medium ${
+                u.status === "approved" ? "bg-success/10 text-success" :
+                u.status === "pending" ? "bg-warning/10 text-warning" :
+                "bg-destructive/10 text-destructive"
+              }`}>
+                {u.status}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

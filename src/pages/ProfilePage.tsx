@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
-import { doc, updateDoc, getDoc, addDoc, collection, getDocs, arrayUnion, Timestamp } from "firebase/firestore";
+import { doc, updateDoc, getDoc, addDoc, collection, getDocs, arrayUnion, Timestamp, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { LogOut, KeyRound, FileText, MessageCircle, ExternalLink, PlusCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+  const [courseRequestStatuses, setCourseRequestStatuses] = useState<Record<string, string>>({});
 
   useEffect(() => { if (!user) navigate("/auth?mode=login"); }, [user]);
 
@@ -43,7 +44,6 @@ export default function ProfilePage() {
     }
   }, [userDoc?.activeCourseId]);
 
-  // Fetch all courses when enroll dialog opens
   useEffect(() => {
     if (enrollOpen) {
       getDocs(collection(db, "courses")).then((snap) => {
@@ -52,6 +52,20 @@ export default function ProfilePage() {
       });
     }
   }, [enrollOpen]);
+
+  // Fetch enrollment request statuses for enrolled courses
+  useEffect(() => {
+    if (user && userDoc?.enrolledCourses?.length) {
+      getDocs(query(collection(db, "enrollRequests"), where("userId", "==", user.uid))).then((snap) => {
+        const statuses: Record<string, string> = {};
+        snap.docs.forEach((d) => {
+          const data = d.data() as { courseId: string; status: string };
+          statuses[data.courseId] = data.status;
+        });
+        setCourseRequestStatuses(statuses);
+      });
+    }
+  }, [user, userDoc?.enrolledCourses]);
 
   if (!user || !userDoc) return null;
 
@@ -139,17 +153,25 @@ export default function ProfilePage() {
         <div className="mt-6">
           <h3 className="font-semibold text-foreground mb-3">Enrolled Courses</h3>
           <div className="space-y-2">
-            {userDoc.enrolledCourses.map((c) => (
-              <div key={c.courseId} className={`flex items-center justify-between p-3 rounded-lg border ${c.courseId === userDoc.activeCourseId ? "border-primary bg-accent" : "border-border bg-card"}`}>
-                <div className="flex items-center gap-3">
-                  {c.courseThumbnail && <img src={c.courseThumbnail} alt="" className="w-10 h-10 rounded-md object-cover" />}
-                  <span className="text-sm font-medium text-foreground">{c.courseName}</span>
+            {userDoc.enrolledCourses.map((c) => {
+              const reqStatus = courseRequestStatuses[c.courseId] || "approved";
+              const isApproved = reqStatus === "approved";
+              const isPending = reqStatus === "pending";
+              return (
+                <div key={c.courseId} className={`flex items-center justify-between p-3 rounded-lg border ${c.courseId === userDoc.activeCourseId ? "border-primary bg-accent" : "border-border bg-card"}`}>
+                  <div className="flex items-center gap-3">
+                    {c.courseThumbnail && <img src={c.courseThumbnail} alt="" className="w-10 h-10 rounded-md object-cover" />}
+                    <div>
+                      <span className="text-sm font-medium text-foreground">{c.courseName}</span>
+                      {isPending && <p className="text-[11px] text-warning">Pending approval</p>}
+                    </div>
+                  </div>
+                  {isApproved && c.courseId !== userDoc.activeCourseId && userDoc.enrolledCourses.length > 1 && (
+                    <button onClick={() => handleSwitchCourse(c.courseId)} className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground">Select</button>
+                  )}
                 </div>
-                {c.courseId !== userDoc.activeCourseId && userDoc.enrolledCourses.length > 1 && (
-                  <button onClick={() => handleSwitchCourse(c.courseId)} className="text-xs px-3 py-1 rounded-md bg-primary text-primary-foreground">Select</button>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
