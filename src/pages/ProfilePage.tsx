@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
-import { doc, updateDoc, getDoc, addDoc, collection, getDocs, arrayUnion, Timestamp } from "firebase/firestore";
+import { doc, updateDoc, getDoc, addDoc, collection, getDocs, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { LogOut, KeyRound, FileText, MessageCircle, ExternalLink, PlusCircle, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
