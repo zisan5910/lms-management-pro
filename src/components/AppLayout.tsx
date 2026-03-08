@@ -15,16 +15,16 @@ export function AppLayout() {
   const isMobile = useIsMobile();
   const { pathname } = useLocation();
 
+  // Desktop user panel: no bottom nav. Admin panel: always bottom nav. Mobile: always bottom nav.
   const showBottomNav = isMobile || isAdmin;
+
+  // Show desktop sidebar for user on non-video pages
   const isVideoPage = pathname.startsWith("/video/");
   const showDesktopSidebar = !isMobile && !isAdmin && !isVideoPage;
 
-  // Hide hamburger when a sidebar is already visible on screen
-  const hideHamburger = (!isMobile && isAdmin) || showDesktopSidebar;
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <TopNav onMenuClick={() => setSidebarOpen(true)} hideMenu={hideHamburger} />
+      <TopNav onMenuClick={() => setSidebarOpen(true)} />
       
       {isAdmin ? (
         <>

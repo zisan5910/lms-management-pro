@@ -6,10 +6,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Props {
   onMenuClick: () => void;
-  hideMenu?: boolean;
 }
 
-export function TopNav({ onMenuClick, hideMenu }: Props) {
+export function TopNav({ onMenuClick }: Props) {
   const settings = useAppSettings();
   const { dark, toggle } = useTheme();
   const isMobile = useIsMobile();
@@ -29,11 +28,9 @@ export function TopNav({ onMenuClick, hideMenu }: Props) {
     <header className="sticky top-0 z-40 bg-background border-b border-border">
       <div className="flex items-center justify-between h-14 px-4">
         <div className="flex items-center gap-3">
-          {!hideMenu && (
-            <button onClick={onMenuClick} className="text-foreground">
-              <Menu className="h-5 w-5" />
-            </button>
-          )}
+          <button onClick={onMenuClick} className="text-foreground">
+            <Menu className="h-5 w-5" />
+          </button>
           {settings.appLogo && (
             <img src={settings.appLogo} alt="" className="h-7 w-7 rounded-md object-contain" />
           )}

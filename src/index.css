@@ -89,6 +89,7 @@
     -webkit-touch-callout: none;
     overscroll-behavior: none;
   }
+  /* Disable zoom on mobile */
   input, select, textarea {
     font-size: 16px !important;
   }
@@ -108,21 +109,4 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-}
-
-/* Global thin scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: hsl(var(--border)) transparent;
-}
-*::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-*::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--border));
-  border-radius: 9999px;
 }

@@ -35,6 +35,7 @@ const formatTime = (s: number) => {
   return `${m}:${sec.toString().padStart(2, "0")}`;
 };
 
+// Load YT API once globally
 let ytApiLoaded = false;
 let ytApiCallbacks: (() => void)[] = [];
 
@@ -87,6 +88,7 @@ export default function VideoPlayerPage() {
     return () => { mountedRef.current = false; };
   }, []);
 
+  // Fetch video data
   useEffect(() => {
     if (!user) { navigate("/auth?mode=login"); return; }
     if (!videoId) return;
@@ -101,6 +103,7 @@ export default function VideoPlayerPage() {
         const v = { id: snap.id, ...snap.data() } as Video;
         setVideo(v);
 
+        // Fetch chapters from course
         try {
           const courseSnap = await getDoc(doc(db, "courses", v.courseId));
           if (!cancelled && courseSnap.exists()) {
@@ -126,22 +129,26 @@ export default function VideoPlayerPage() {
     return () => { cancelled = true; };
   }, [videoId, user]);
 
+  // Initialize YouTube player - runs after video data is loaded
   useEffect(() => {
     if (!video || loading) return;
     const ytId = getYouTubeId(video.videoURL);
     if (!ytId) return;
 
+    // Reset state
     setPlayerReady(false);
     setIsPlaying(false);
     setCurrentTime(0);
     setDuration(0);
     setSpeedIndex(0);
 
+    // Destroy old player
     if (playerRef.current) {
       try { playerRef.current.destroy(); } catch {}
       playerRef.current = null;
     }
 
+    // Recreate the player div
     const container = playerDivRef.current;
     if (!container) return;
     container.innerHTML = '';
@@ -154,6 +161,7 @@ export default function VideoPlayerPage() {
 
     const initPlayer = () => {
       if (!mountedRef.current) return;
+      // Verify the element still exists
       const el = document.getElementById(`yt-player-${currentVideoId}`);
       if (!el) return;
 
@@ -180,6 +188,7 @@ export default function VideoPlayerPage() {
     };
 
     ensureYTApi(() => {
+      // Small delay to ensure DOM is ready
       setTimeout(initPlayer, 100);
     });
 
@@ -292,7 +301,7 @@ export default function VideoPlayerPage() {
   return (
     <div className="animate-fade-in lg:flex lg:gap-4 lg:p-4 h-[calc(100vh-3.5rem)]" onContextMenu={(e) => e.preventDefault()}>
       <div className="lg:flex-1 flex flex-col h-full">
-        <div className={`z-30 bg-background shrink-0 ${isMobile ? "sticky top-14" : ""}`}>
+        <div className="z-30 bg-background shrink-0">
           <div
             ref={containerRef}
             className="relative aspect-video bg-black overflow-hidden select-none"
@@ -358,7 +367,7 @@ export default function VideoPlayerPage() {
               )}
               {!isMobile && (
                 <button onClick={() => navigate("/my-courses")}
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md bg-accent border border-border text-foreground">
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm rounded-md bg-accent border border-border text-foreground ml-auto">
                   <ArrowLeft className="h-4 w-4" /> My Courses
                 </button>
               )}
@@ -366,7 +375,7 @@ export default function VideoPlayerPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 pb-20 lg:hidden">
+        <div className="flex-1 overflow-y-auto p-4 lg:hidden">
            <div className="flex items-center justify-between mb-3">
              <h3 className="font-semibold text-foreground">More Videos</h3>
              {allChapters.length > 0 && (
