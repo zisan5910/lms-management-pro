@@ -2,11 +2,10 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Video, Course } from "@/types";
-import { uploadToImgBB } from "@/lib/imgbb";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, ChevronUp, ChevronDown, ChevronLeft, Search, Film, Filter } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ImagePreview } from "@/components/ImagePreview";
+import { ImageUrlInput } from "@/components/ImageUrlInput";
 import { AdminVideoListSkeleton } from "@/components/skeletons/AdminSkeleton";
 
 export default function AdminVideosPage() {
@@ -24,7 +23,6 @@ export default function AdminVideosPage() {
   const [chapterId, setChapterId] = useState("");
   const [title, setTitle] = useState("");
   const [thumbnail, setThumbnail] = useState("");
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [videoURL, setVideoURL] = useState("");
   const [pdfURL, setPdfURL] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -48,21 +46,19 @@ export default function AdminVideosPage() {
   const selectedSubject = selectedCourse?.subjects?.find((s) => s.subjectId === subjectId);
 
   const resetForm = () => {
-    setCourseId(""); setSubjectId(""); setChapterId(""); setTitle(""); setThumbnail(""); setThumbnailFile(null); setVideoURL(""); setPdfURL(""); setEditVideo(null);
+    setCourseId(""); setSubjectId(""); setChapterId(""); setTitle(""); setThumbnail(""); setVideoURL(""); setPdfURL(""); setEditVideo(null);
   };
 
   const openAdd = () => { resetForm(); setShowForm(true); };
 
   const openEdit = (v: Video) => {
     setEditVideo(v); setCourseId(v.courseId); setSubjectId(v.subjectId); setChapterId(v.chapterId || "");
-    setTitle(v.title); setThumbnail(v.thumbnail); setThumbnailFile(null); setVideoURL(v.videoURL); setPdfURL(v.pdfURL); setShowForm(true);
+    setTitle(v.title); setThumbnail(v.thumbnail); setVideoURL(v.videoURL); setPdfURL(v.pdfURL); setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setSubmitting(true);
     try {
-      let thumb = thumbnail;
-      if (thumbnailFile) thumb = await uploadToImgBB(thumbnailFile);
       const course = courses.find((c) => c.id === courseId);
       const subject = course?.subjects?.find((s) => s.subjectId === subjectId);
       const chapter = subject?.chapters?.find((ch) => ch.chapterId === chapterId);
@@ -73,7 +69,7 @@ export default function AdminVideosPage() {
       const data: any = {
         courseId, courseName: course?.courseName || "", subjectId, subjectName: subject?.subjectName || "",
         chapterId: chapterId || "", chapterName: chapter?.chapterName || "",
-        title, thumbnail: thumb, videoURL, pdfURL, createdAt: Timestamp.now(),
+        title, thumbnail, videoURL, pdfURL, createdAt: Timestamp.now(),
       };
       if (editVideo) {
         data.order = editVideo.order;
@@ -172,11 +168,7 @@ export default function AdminVideosPage() {
                 <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-muted-foreground">Thumbnail</label>
-                <ImagePreview file={thumbnailFile} url={thumbnail} size="lg" />
-                <input type="file" accept="image/*" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} className="w-full text-xs mt-1 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer" />
-              </div>
+              <ImageUrlInput label="Thumbnail URL" value={thumbnail} onChange={setThumbnail} placeholder="https://i.postimg.cc/..." />
 
               <div>
                 <label className="text-xs font-medium text-muted-foreground">YouTube Video URL</label>

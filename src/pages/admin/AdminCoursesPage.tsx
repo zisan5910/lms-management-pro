@@ -3,14 +3,13 @@ import { useSearchParams } from "react-router-dom";
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, Timestamp, writeBatch } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Course, Subject, Instructor, DiscussionGroup, Chapter } from "@/types";
-import { uploadToImgBB } from "@/lib/imgbb";
 import { toast } from "sonner";
 import { Plus, Edit, Trash2, X, ChevronUp, ChevronDown, ChevronLeft, GripVertical, BookOpen, Users, MessageSquare, FileText, Link2, Image } from "lucide-react";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ImagePreview } from "@/components/ImagePreview";
+import { ImageUrlInput } from "@/components/ImageUrlInput";
 import { AdminCourseListSkeleton } from "@/components/skeletons/AdminSkeleton";
 
 /* ── Section wrapper ── */
@@ -40,13 +39,11 @@ export default function AdminCoursesPage() {
   const [editCourse, setEditCourse] = useState<Course | null>(null);
 
   const [courseName, setCourseName] = useState("");
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState("");
   const [price, setPrice] = useState(0);
   const [overview, setOverview] = useState<string[]>([""]);
   const [subjects, setSubjects] = useState<Subject[]>([{ subjectId: crypto.randomUUID(), subjectName: "", chapters: [] }]);
   const [instructors, setInstructors] = useState<Instructor[]>([{ name: "", subject: "", image: "" }]);
-  const [instructorImageFiles, setInstructorImageFiles] = useState<(File | null)[]>([null]);
   const [discussionGroups, setDiscussionGroups] = useState<DiscussionGroup[]>([{ name: "", link: "" }]);
   const [routinePDF, setRoutinePDF] = useState("");
   const [allMaterialsLink, setAllMaterialsLink] = useState("");
@@ -63,9 +60,9 @@ export default function AdminCoursesPage() {
   useEffect(() => { fetchCourses(); }, []);
 
   const resetForm = () => {
-    setCourseName(""); setThumbnailFile(null); setThumbnailUrl(""); setPrice(0);
+    setCourseName(""); setThumbnailUrl(""); setPrice(0);
     setOverview([""]); setSubjects([{ subjectId: crypto.randomUUID(), subjectName: "", chapters: [] }]);
-    setInstructors([{ name: "", subject: "", image: "" }]); setInstructorImageFiles([null]);
+    setInstructors([{ name: "", subject: "", image: "" }]);
     setDiscussionGroups([{ name: "", link: "" }]); setRoutinePDF(""); setAllMaterialsLink(""); setEditCourse(null);
   };
 
@@ -76,7 +73,6 @@ export default function AdminCoursesPage() {
     setEditCourse(c); setCourseName(c.courseName); setThumbnailUrl(c.thumbnail); setPrice(c.price);
     setOverview(c.overview?.length ? c.overview : [""]); setSubjects(c.subjects?.length ? c.subjects : [{ subjectId: crypto.randomUUID(), subjectName: "", chapters: [] }]);
     setInstructors(c.instructors?.length ? c.instructors : [{ name: "", subject: "", image: "" }]);
-    setInstructorImageFiles(c.instructors?.length ? c.instructors.map(() => null) : [null]);
     setDiscussionGroups(c.discussionGroups?.length ? c.discussionGroups : [{ name: "", link: "" }]);
     setRoutinePDF(c.routinePDF || ""); setAllMaterialsLink(c.allMaterialsLink || ""); setShowForm(true);
   };
@@ -84,20 +80,11 @@ export default function AdminCoursesPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setSubmitting(true);
     try {
-      let thumb = thumbnailUrl;
-      if (thumbnailFile) thumb = await uploadToImgBB(thumbnailFile);
       const filteredSubjects = subjects.filter((s) => s.subjectName);
-      const updatedInstructors = await Promise.all(
-        instructors.map(async (inst, i) => {
-          let img = inst.image;
-          if (instructorImageFiles[i]) img = await uploadToImgBB(instructorImageFiles[i]!);
-          return { ...inst, image: img };
-        })
-      );
       const data: any = {
-        courseName, thumbnail: thumb, price, overview: overview.filter(Boolean),
+        courseName, thumbnail: thumbnailUrl, price, overview: overview.filter(Boolean),
         subjects: filteredSubjects,
-        instructors: updatedInstructors.filter((i) => i.name),
+        instructors: instructors.filter((i) => i.name),
         discussionGroups: discussionGroups.filter((g) => g.name && g.link),
         routinePDF, allMaterialsLink, createdAt: Timestamp.now(),
       };
@@ -152,11 +139,7 @@ export default function AdminCoursesPage() {
           <FormSection icon={BookOpen} title="Basic Information">
             <FormInput label="Course Name" type="text" placeholder="e.g. HSC Physics 2025" value={courseName} onChange={(e) => setCourseName(e.target.value)} required />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-muted-foreground">Thumbnail</label>
-                <ImagePreview file={thumbnailFile} url={thumbnailUrl} />
-                <input type="file" accept="image/*" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} className="w-full text-xs mt-1 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer" />
-              </div>
+              <ImageUrlInput label="Thumbnail URL" value={thumbnailUrl} onChange={setThumbnailUrl} placeholder="https://i.postimg.cc/..." />
               <FormInput label="Price (৳)" type="number" placeholder="0" value={price} onChange={(e) => setPrice(Number(e.target.value))} />
             </div>
           </FormSection>
@@ -251,19 +234,20 @@ export default function AdminCoursesPage() {
                     </select>
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="text-xs font-medium text-muted-foreground">Photo</label>
-                  <ImagePreview file={instructorImageFiles[i]} url={inst.image} />
-                  <input type="file" accept="image/*" onChange={(e) => { const files = [...instructorImageFiles]; files[i] = e.target.files?.[0] || null; setInstructorImageFiles(files); }} className="w-full text-xs mt-1 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer" />
-                </div>
+                <ImageUrlInput
+                  label="Photo URL"
+                  value={inst.image}
+                  onChange={(url) => { const a = [...instructors]; a[i] = { ...a[i], image: url }; setInstructors(a); }}
+                  placeholder="https://i.postimg.cc/..."
+                />
                 {instructors.length > 1 && (
-                  <button type="button" onClick={() => { setInstructors(instructors.filter((_, j) => j !== i)); setInstructorImageFiles(instructorImageFiles.filter((_, j) => j !== i)); }} className="text-xs text-destructive/70 hover:text-destructive transition-colors flex items-center gap-1">
+                  <button type="button" onClick={() => { setInstructors(instructors.filter((_, j) => j !== i)); }} className="text-xs text-destructive/70 hover:text-destructive transition-colors flex items-center gap-1">
                     <Trash2 className="h-3 w-3" /> Remove
                   </button>
                 )}
               </div>
             ))}
-            <button type="button" onClick={() => { setInstructors([...instructors, { name: "", subject: "", image: "" }]); setInstructorImageFiles([...instructorImageFiles, null]); }} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
+            <button type="button" onClick={() => { setInstructors([...instructors, { name: "", subject: "", image: "" }]); }} className="text-xs font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1">
               <Plus className="h-3 w-3" /> Add Instructor
             </button>
           </FormSection>

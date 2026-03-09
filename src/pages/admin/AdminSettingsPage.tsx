@@ -1,18 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAppSettings } from "@/contexts/AppSettingsContext";
 import { PaymentMethod, SocialLink, UsefulLink } from "@/types";
-import { uploadToImgBB } from "@/lib/imgbb";
 import { toast } from "sonner";
 import { X, Plus, Save, Settings, CreditCard, Share2, Link2 } from "lucide-react";
-import { ImagePreview } from "@/components/ImagePreview";
+import { ImageUrlInput } from "@/components/ImageUrlInput";
 
 export default function AdminSettingsPage() {
   const settings = useAppSettings();
   const [appName, setAppName] = useState(settings.appName);
   const [appLogo, setAppLogo] = useState(settings.appLogo);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [youtubeChannel, setYoutubeChannel] = useState(settings.youtubeChannel);
   const [googleDrive, setGoogleDrive] = useState(settings.googleDrive);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>(settings.paymentMethods?.length ? settings.paymentMethods : [{ name: "", number: "" }]);
@@ -20,7 +18,7 @@ export default function AdminSettingsPage() {
   const [usefulLinks, setUsefulLinks] = useState<UsefulLink[]>(settings.usefulLinks?.length ? settings.usefulLinks : [{ name: "", link: "" }]);
   const [saving, setSaving] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     setAppName(settings.appName);
     setAppLogo(settings.appLogo);
     setYoutubeChannel(settings.youtubeChannel);
@@ -28,16 +26,13 @@ export default function AdminSettingsPage() {
     if (settings.paymentMethods?.length) setPaymentMethods(settings.paymentMethods);
     if (settings.socialLinks?.length) setSocialLinks(settings.socialLinks);
     if (settings.usefulLinks?.length) setUsefulLinks(settings.usefulLinks);
-  });
+  }, [settings]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      let logo = appLogo;
-      if (logoFile) logo = await uploadToImgBB(logoFile);
-
       await setDoc(doc(db, "settings", "app"), {
-        appName, appLogo: logo, youtubeChannel, googleDrive,
+        appName, appLogo, youtubeChannel, googleDrive,
         paymentMethods: paymentMethods.filter((p) => p.name && p.number),
         socialLinks: socialLinks.filter((s) => s.name && s.link),
         usefulLinks: usefulLinks.filter((u) => u.name && u.link),
@@ -72,11 +67,7 @@ export default function AdminSettingsPage() {
             <label className="text-xs font-medium text-muted-foreground">App Name</label>
             <input type="text" placeholder="App Name" value={appName} onChange={(e) => setAppName(e.target.value)} className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
           </div>
-          <div>
-            <label className="text-xs font-medium text-muted-foreground">App Logo</label>
-            <ImagePreview file={logoFile} url={appLogo} size="sm" />
-            <input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} className="w-full text-xs mt-1 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer" />
-          </div>
+          <ImageUrlInput label="App Logo URL" value={appLogo} onChange={setAppLogo} placeholder="https://i.postimg.cc/..." />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-medium text-muted-foreground">YouTube Channel</label>
