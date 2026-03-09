@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { collection, getDocs, addDoc, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Course, Video } from "@/types";
-import { uploadToImgBB } from "@/lib/imgbb";
 import { toast } from "sonner";
-import { ImagePreview } from "@/components/ImagePreview";
+import { ImageUrlInput } from "@/components/ImageUrlInput";
 import { Film, CheckCircle } from "lucide-react";
 
 export default function AdminAddVideoPage() {
@@ -14,7 +13,7 @@ export default function AdminAddVideoPage() {
   const [subjectId, setSubjectId] = useState("");
   const [chapterId, setChapterId] = useState("");
   const [title, setTitle] = useState("");
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnail, setThumbnail] = useState("");
   const [videoURL, setVideoURL] = useState("");
   const [pdfURL, setPdfURL] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -36,8 +35,6 @@ export default function AdminAddVideoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); setSubmitting(true);
     try {
-      let thumbnail = "";
-      if (thumbnailFile) thumbnail = await uploadToImgBB(thumbnailFile);
       const course = courses.find((c) => c.id === courseId);
       const subject = course?.subjects?.find((s) => s.subjectId === subjectId);
       const chapter = subject?.chapters?.find((ch) => ch.chapterId === chapterId);
@@ -53,7 +50,7 @@ export default function AdminAddVideoPage() {
       toast.success("Video added successfully!");
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2000);
-      setTitle(""); setThumbnailFile(null); setVideoURL(""); setPdfURL(""); setChapterId("");
+      setTitle(""); setThumbnail(""); setVideoURL(""); setPdfURL(""); setChapterId("");
       // Refresh videos for order calc
       const vSnap = await getDocs(collection(db, "videos"));
       setVideos(vSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Video)));
@@ -107,11 +104,7 @@ export default function AdminAddVideoPage() {
               <input type="text" placeholder="Video Title" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full px-3 py-2.5 rounded-lg bg-background border border-border text-foreground text-sm mt-1 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all" />
             </div>
 
-            <div>
-              <label className="text-xs font-medium text-muted-foreground">Thumbnail</label>
-              <ImagePreview file={thumbnailFile} size="lg" />
-              <input type="file" accept="image/*" onChange={(e) => setThumbnailFile(e.target.files?.[0] || null)} className="w-full text-xs mt-1 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-primary/10 file:text-primary file:font-medium file:cursor-pointer" />
-            </div>
+            <ImageUrlInput label="Thumbnail URL" value={thumbnail} onChange={setThumbnail} placeholder="https://i.postimg.cc/..." />
 
             <div>
               <label className="text-xs font-medium text-muted-foreground">YouTube Video URL</label>
